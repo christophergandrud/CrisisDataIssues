@@ -7,7 +7,7 @@
 library(foreign)
 library(xtable)
 
-setwd('~/Dropbox/AMCProject/KeeferReplication/tables/')
+setwd('~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables/')
 
 KeefOrig <- read.dta('KeeferBasic.dta')
 Hono <- read.dta('Honohan.dta')
@@ -48,4 +48,5 @@ Comb[, Temp][is.na(Comb[, Temp])] <- ""
 
 names(Comb) <- c('', 'Keefer', 'HK', 'LV-Keefer', 'LV pre-2001', 'LV Full', 'LV Full', 'Keefer Log', 'LV Full Log')
 
-print(xtable(Comb, dcolumn = TRUE, booktabs = TRUE), size = 'scriptsize', include.rownames = FALSE, floating = FALSE)
+print(xtable(Comb, dcolumn = TRUE, booktabs = TRUE), size = 'scriptsize', include.rownames = FALSE, floating = FALSE,
+      file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables/KeeferRepTable.tex')

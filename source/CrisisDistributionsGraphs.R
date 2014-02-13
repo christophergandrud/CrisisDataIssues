@@ -1,7 +1,7 @@
 ################
 # Create crisis/political institutions distributions graphs
 # Christopher Gandrud
-# 10 February 2014
+# 13 February 2014
 ################
 
 library(foreign)
@@ -9,7 +9,7 @@ library(ggplot2)
 library(gridExtra)
 library(reshape2)
 
-Main <- read.dta('~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/KeeferExtended.dta')
+Main <- read.dta('/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 LV <- subset(Main, LV2012_Fiscal >= 0)
 Keefer <- subset(Main, Keefer2007_Fiscal >= 0)
 
@@ -40,7 +40,7 @@ Plot6 <- ggplot(LV, aes(year, log(GDPperCapita))) + geom_jitter() + geom_smooth(
             theme_bw()
 
 # Combine Plots
-pdf('~/Dropbox/AMCProject/KeeferReplication/figures/PolCris.pdf')
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/figures/PolCris.pdf')
 grid.arrange(Plot1, Plot2, Plot3, Plot4, Plot5, Plot6, ncol = 2)
 dev.off()
 
@@ -59,7 +59,7 @@ PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing)) +
               xlab('') + ylab('Laeven & Valencia - Honohan & Klingebiel\n') +
               theme_bw(base_size = 15)
 
-pdf('~/Dropbox/AMCProject/KeeferReplication/figures/FiscalDifference.pdf')
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/figures/FiscalDifference.pdf')
 PlotDiff
 dev.off()
 
@@ -91,6 +91,6 @@ PlotInstCosts <- ggplot(SubMolten, aes(value, stabnsLag3, colour = as.factor(var
   xlab('\nFiscal Costs of Crisis (% GDP)') + ylab('Political Instability\n(3 year lagged average)\n') +
   theme_bw()
 
-pdf(file = '~/Dropbox/AMCProject/KeeferReplication/figures/InstCosts.pdf')
+pdf(file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/figures/InstCosts.pdf')
 grid.arrange(PlotDensity, PlotInstCosts)
 dev.off()
