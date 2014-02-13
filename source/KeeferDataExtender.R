@@ -152,27 +152,8 @@ LVSub <- LVFull[, 1:3]
 # Replace ongoing with 2011
 LVSub$End[LVSub$End == 'ongoing'] <- '2011'
 
-LVSub$Start <- as.numeric(LVSub$Start)
-LVSub$End <- as.numeric(LVSub$End)
-
-year = 1975:2011
-Country = unique(LVSub$Country)
-
-LVNew <- merge(Country, year)
-names(LVNew) <- c('Country', 'year')
-LVNew <- merge(LVNew, LVSub, by = 'Country')
-
-LVNew <- LVNew[order(LVNew$Country, LVNew$year), ]
-LVNew$LV_SystemCrisis <- 0
-LVNew$LV_SystemCrisis[LVNew$Start == LVNew$year] <- 1
-LVNew$LV_SystemCrisis[LVNew$End == LVNew$year] <- 1
-LVNew$LV_SystemCrisis[LVNew$Start < LVNew$year & LVNew$year < LVNew$End] <- 1
-
-LVNew <- LVNew[order(LVNew$Country, LVNew$year, LVNew$LV_SystemCrisis), ]
-
-LVNew <- LVNew[!duplicated(LVNew[, 1:2], fromLast = TRUE), ]
-
-LVNew <- VarDrop(LVNew, c('Start', 'End'))
+LVNew <- TimeFill(LVSub, GroupVar = 'Country', StartVar = 'Start', EndVar = 'End', 
+                  NewVar = 'LV_SystemCrisis', NewTimeVar = 'year')
 
 LVNew$Country <- as.character(LVNew$Country)
 
