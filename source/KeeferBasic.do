@@ -1,13 +1,13 @@
 ///////////////
 // Update basic Keefer (2007)
 // Christopher Gandrud
-// 10 February 2014
+// 13 February 2014
 // Using Stata 12
 ///////////////
 
-cd "~/Dropbox/AMCProject/KeeferReplication/tables"
+cd "~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables"
 
-use "~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/KeeferExtended.dta", clear
+use "/git_repositories/CrisisDataIssues/data/KeeferExtended.dta", clear
 
 // Keefer Table 4, Model 2
 gen LogKeefer = log(Keefer2007_Fiscal + 0.1)	

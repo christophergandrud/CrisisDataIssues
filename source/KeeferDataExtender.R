@@ -1,7 +1,7 @@
 ################
 # Keefer data extender
 # Christopher Gandrud
-# 12 February 2014
+# 13 February 2014
 ###############
 
 library(DataCombine)
@@ -30,7 +30,7 @@ rollmean33 <- function(x){
 }
 
 #### Fiscal transfers data (both Laeven and Valencia (2012) and Keefer (2007))
-Fiscal <- read.csv('~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/KefferFiscal.csv', 
+Fiscal <- read.csv('/git_repositories/CrisisDataIssues/data/KefferFiscal.csv', 
                    stringsAsFactors = FALSE)
 Fiscal <- VarDrop(Fiscal, 'country')
 Fiscal$HonohanCrisisOngoing[is.na(Fiscal$HonohanCrisisOngoing)] <- 0
@@ -117,7 +117,7 @@ Comb <- dMerge(Comb, Fiscal, Var = c('iso2c', 'year'), all.y = TRUE)
 Comb <- dMerge(Comb, WdiSlim, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb$country <- countrycode(Comb$iso2c, origin = 'iso2c', destination = 'country.name')
 
-write.dta(Comb, file = '~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/KeeferExtended.dta')
+write.dta(Comb, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 
 ##### Create Reinhart and Rogoff (2010) combination #####
 
@@ -125,7 +125,7 @@ write.dta(Comb, file = '~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/Keefer
 RR <- RRCrisisGet()
 rr <- RR
 
-write.csv(rr, file = '~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/ReinhartRogoffCrisis.csv')
+write.csv(rr, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffCrisis.csv', row.names = FALSE)
 
 # Keep if independent
 rr <- subset(rr, RR_Independence == 1)
@@ -138,7 +138,7 @@ rr <- slide(rr, Var = 'RR_BankingCrisis', GroupVar = 'country', slideBy = 1)
 CombRR <- dMerge(rr, Fiscal, Var = c('iso2c', 'year'), all.x = TRUE)
 CombRR <- dMerge(CombRR, PolityData, Var = c('iso2c', 'year'), all.x = TRUE)
 
-write.csv(CombRR, file = '~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/ReinhartRogoffFiscalPolity.csv')
+write.csv(CombRR, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffFiscalPolity.csv', row.names = FALSE)
 
 #### Reinhart and Rogoff/Laeven and Valencia Start and Stop
 
@@ -181,5 +181,5 @@ LVNew <- LVNew[, c('iso2c', 'year', 'LV_SystemCrisis')]
 
 CombRRLV <- dMerge(rr, LVNew, Var = c('iso2c', 'year'), all = TRUE)
 
-write.csv(CombRRLV, file = '~/Dropbox/AMCProject/MissingLinkDataAnalysis/data/ReinhartRogoffLVCount.csv')
+write.csv(CombRRLV, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffLVCount.csv', row.names = FALSE)
 
