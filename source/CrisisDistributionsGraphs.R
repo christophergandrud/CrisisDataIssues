@@ -59,7 +59,7 @@ PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing)) +
               xlab('') + ylab('Laeven & Valencia - Honohan & Klingebiel\n') +
               theme_bw(base_size = 15)
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/figures/FiscalDifference.pdf')
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/figures/FiscalDifference.pdf', width = 10)
 PlotDiff
 dev.off()
 
