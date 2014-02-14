@@ -1,7 +1,7 @@
 ################
 # Keefer data extender
 # Christopher Gandrud
-# 13 February 2014
+# 14 February 2014
 ###############
 
 library(DataCombine)
@@ -50,7 +50,7 @@ Fiscal <- dMerge(Fiscal, Ongoing, Var = c('iso2c', 'year'), all = TRUE)
 Fiscal <- subset(Fiscal, iso2c != '') # Drop Czechoslovakia
 
 # Polity IV data
-PolityData <- PolityGet(vars = c('polity2'), OutCountryID = 'iso2c', duplicates = 'return')
+PolityData <- PolityGet(vars = c('polity2'), OutCountryID = 'iso2c', duplicates = 'drop')
 PolityData <- DropNA(PolityData, c('polity2'))
 PolityData <- VarDrop(PolityData, 'country')
 

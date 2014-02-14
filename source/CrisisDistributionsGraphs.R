@@ -1,7 +1,7 @@
 ################
 # Create crisis/political institutions distributions graphs
 # Christopher Gandrud
-# 13 February 2014
+# 14 February 2014
 ################
 
 library(foreign)
