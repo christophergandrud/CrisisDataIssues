@@ -1,7 +1,7 @@
 ################
 # Create crisis/political institutions distributions graphs
 # Christopher Gandrud
-# 14 February 2014
+# 20 February 2014
 ################
 
 library(foreign)
@@ -51,8 +51,9 @@ cor.test(Main$LV2012_Fiscal, Main$Honohan2003_Fiscal)
 Main$HKOngoing[Main$HonohanCrisisOngoing == 0] <- 'Crisis Complete'
 Main$HKOngoing[Main$HonohanCrisisOngoing == 1] <- 'Crisis Ongoing'
 
-PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing)) + 
+PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing, label = iso2c)) + 
               geom_jitter(position = position_jitter(width = .5, height = 0), size = 3) +
+              geom_text(angle = 30, vjust = -1) +
               scale_x_continuous(limits = c(1975, 2000)) +
               scale_colour_manual(values = c('black', 'grey'), name = '') +
               geom_hline(aes(yintercept = 0), linetype = 'dotted') +

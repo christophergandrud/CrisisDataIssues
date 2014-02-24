@@ -1,7 +1,7 @@
 ################
 # Compare countries with available data and those without
 # Christopher Gandrud
-# 14 February 2014
+# 24 February 2014
 ################
 
 library(foreign)
@@ -10,6 +10,7 @@ library(gridExtra)
 library(reshape2)
 library(repmis)
 library(psData)
+library(DataCombine)
 
 Main <- source_data('https://raw2.github.com/christophergandrud/amcData/master/BaseFiles/LaeVal2012/LVCrisisResponseFull.csv',
                     stringsAsFactors = FALSE)
