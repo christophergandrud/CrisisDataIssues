@@ -175,13 +175,17 @@ CombRevis$Revision[abs(CombRevis$Diff_LVC) > 0] <- 1
 CombRevis <- NaVar(CombRevis, c('LV2012.Fiscal', 'Honohan2003.Fiscal', 'Caprio1996.Fiscal'))
 CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Honohan2003.Fiscal == 1 & 
                      CombRevis$LV2012.Fiscal != CombRevis$Caprio1996.Fiscal)] <- 1
+CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal == 0 & is.na(CombRevis$Caprio1996.Fiscal) & CombRevis$year < 1996)] <- 1
 CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal %in% 0 & CombRevis$Miss_Caprio1996.Fiscal %in% 1 & 
                       CombRevis$year < 1996)] <- 1
 
 # Recode Philipinnes as no change as change was caused by a coding error in Honohan & Klingebiel (2003)
 CombRevis$Revision[Main$iso2c %in% 'PH' & Main$year %in% 1983] <- 0
 
+# Merge years assuming that LV (2012) has correct start year
+source('/git_repositories/CrisisDataIssues/source/RevisedRevision.R')
 
+# Save to Stata format
 write.dta(CombRevis, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 
 ##### Create Reinhart and Rogoff (2010) combination #####
