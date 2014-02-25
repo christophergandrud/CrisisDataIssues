@@ -1,9 +1,10 @@
 ################
-# Keefer data extender
+# Keefer (2007) data extender
 # Christopher Gandrud
-# 14 February 2014
+# 25 February 2014
 ###############
 
+# Load packages
 library(DataCombine)
 library(countrycode)
 library(psData)
@@ -14,12 +15,12 @@ library(foreign)
 
 # Fuction for keefer rolling 3 year averages
 rollmean3r <- function(x){
-  x <- shift(x, -2)
+  x <- shift(x, -2, reminder = FALSE)
   ma(x, 3, centre = FALSE)
 }
 
 rollmean3f <- function(x){
-  x <- shift(x, 2)
+  x <- shift(x, 2, reminder = FALSE)
   ma(x, 3, centre = FALSE)
 }
 
@@ -70,14 +71,47 @@ DpiData$DiEiec[DpiData$eiec >= 6] <- 1
 DpiData <- ddply(DpiData, .(country), transform, DiEiec33 = rollmean33(DiEiec))
 DpiData <- ddply(DpiData, .(country), transform, Checks33 = rollmean33(checks))
 
-# Create backwards lags
+# Create Keefer backwards lag
 DpiData <- ddply(DpiData, .(country), transform, stabnsLag3 = rollmean3r(stabns))
 
-# Find residuals for lagged check
-Sub <- DropNA(DpiData, c('DiEiec33', 'Checks33'))
-Resid <- lm(DiEiec33 ~ Checks33, data = Sub)
-Sub$ChecksResiduals33 <- Resid$residuals
-Sub <- Sub[, c('iso2c', 'year', 'ChecksResiduals33')]
+# Find residuals for lagged check (modified from Keefer)
+SubKeefer <- DropNA(DpiData, c('DiEiec33', 'Checks33'))
+ResidKeefer <- lm(DiEiec33 ~ Checks33, data = SubKeefer)
+SubKeefer$ChecksResiduals33 <- ResidKeefer$residuals
+SubKeefer <- SubKeefer[, c('iso2c', 'year', 'ChecksResiduals33')]
+
+# Create straight 3 year moving average lags and lead
+## Lags
+DpiData <- ddply(DpiData, .(country), transform, DiEiecLag3 = rollmean3r(DiEiec))
+DpiData <- ddply(DpiData, .(country), transform, ChecksLag3 = rollmean3r(checks))
+
+### Checks residuals 3 year lag
+SubLag <- DropNA(DpiData, c('DiEiecLag3', 'ChecksLag3'))
+ResidLag <- lm(DiEiecLag3 ~ ChecksLag3, data = SubLag)
+SubLag$ChecksResidualsLag3 <- ResidLag$residuals
+SubLag <- SubLag[, c('iso2c', 'year', 'ChecksResidualsLag3')]
+
+## Leads
+DpiData <- ddply(DpiData, .(country), transform, DiEiecLead3 = rollmean3f(DiEiec))
+DpiData <- ddply(DpiData, .(country), transform, ChecksLead3 = rollmean3f(checks))
+DpiData <- ddply(DpiData, .(country), transform, stabnsLead3 = rollmean3f(stabns))
+
+### Checks residuals 3 year lead
+SubLead <- DropNA(DpiData, c('DiEiecLead3', 'ChecksLead3'))
+ResidLead <- lm(DiEiecLead3 ~ ChecksLead3, data = SubLead)
+SubLead$ChecksResidualsLead3 <- ResidLead$residuals
+SubLead <- SubLead[, c('iso2c', 'year', 'ChecksResidualsLead3')]
+
+### Create 3 year leads for time periods begining 3 years in the future
+DpiData <- slideMA(DpiData, Var = 'DiEiec', GroupVar = 'country', periodBound = 5, offset = 2)
+DpiData <- slideMA(DpiData, Var = 'checks', GroupVar = 'country', periodBound = 5, offset = 2)
+DpiData <- slideMA(DpiData, Var = 'stabns', GroupVar = 'country', periodBound = 5, offset = 2)
+
+### Checks residuals 3 year lead
+SubLead3 <- DropNA(DpiData, c('DiEiecMA5_2', 'checksMA5_2'))
+ResidLead3 <- lm(DiEiecMA5_2 ~ checksMA5_2, data = SubLead3)
+SubLead3$ChecksResidualsLead5_2 <- ResidLead3$residuals
+SubLead3 <- SubLead3[, c('iso2c', 'year', 'ChecksResidualsLead5_2')]
 
 # Winset and selectorate data
 Win <- WinsetCreator()
@@ -110,14 +144,34 @@ WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'Growth33', 'Cur
                    'TermsChange', 'Reserves')]
 
 ##### Combine data sets
-Comb <- dMerge(DpiData, Sub, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(DpiData, SubKeefer, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, SubLag, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, SubLead, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, SubLead3, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, PolityData, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Win, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Fiscal, Var = c('iso2c', 'year'), all.y = TRUE)
 Comb <- dMerge(Comb, WdiSlim, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb$country <- countrycode(Comb$iso2c, origin = 'iso2c', destination = 'country.name')
 
-write.dta(Comb, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
+
+#### Revision Create errors variable
+CombRevis = Comb
+CombRevis$Diff_LVH <- (CombRevis$LV2012.Fiscal - CombRevis$Honohan2003.Fiscal)
+CombRevis$Diff_LVC <- (CombRevis$LV2012.Fiscal - CombRevis$Caprio1996.Fiscal)
+CombRevis$Diff_HC <- (CombRevis$Honohan2003.Fiscal - CombRevis$Caprio1996.Fiscal)
+
+#### Create indicator for whether or not data was revised by Laeven and Valencia (2012)
+CombRevis$Revision <- 0
+CombRevis$Revision[CombRevis$Diff_LVH > 0] <- 1
+CombRevis$Revision[CombRevis$Diff_LVC > 0] <- 1
+
+CombRevis <- NaVar(CombRevis, c('LV2012.Fiscal', 'Honohan2003.Fiscal', 'Caprio1996.Fiscal'))
+CombRevis$Revision[CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Honohan2003.Fiscal == 1] <- 1
+CombRevis$Revision[CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Caprio1996.Fiscal == 1] <- 1
+
+
+write.dta(CombRevis, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 
 ##### Create Reinhart and Rogoff (2010) combination #####
 
