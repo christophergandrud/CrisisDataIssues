@@ -130,12 +130,18 @@ Wdi <- Wdi[order(Wdi$country, Wdi$year), ]
 ## Create transformed variables
 # Income
 Wdi <- ddply(Wdi, .(country), transform, Income33 = rollmean33(GDPperCapita))
+Wdi <- slideMA(DpiData, Var = GDPperCapita, GroupVar = 'country', periodBound = 3, NewVar = 'IncomeLead3')
+
 # Growth
-Wdi <- ddply(Wdi, .(country), transform, Growth33 = rollmean3r(GDPChange))
+Wdi <- ddply(Wdi, .(country), transform, Growth33 = rollmean33(GDPChange))
+Wdi <- slideMA(DpiData, Var = GDPChange, GroupVar = 'country', periodBound = 3, NewVar = 'GrowthLead3')
+
 # CurrentAccount 1
 Wdi <- slide(Wdi, Var = 'CurrentAccount', GroupVar = 'country', NewVar = 'CurrentAccountLag1')
+
 # CurrentAccount 2
 Wdi$CurrentAccountMinus <- Wdi$CurrentAccount - Wdi$CurrentAccountLag1 
+
 # ChangeTermsTrade
 Wdi$Terms <- Wdi$Exports/Wdi$Imports
 Wdi <- PercChange(Wdi, Var = 'Terms', GroupVar = 'country', NewVar = 'TermsChange', type = 'proportion')
@@ -163,12 +169,17 @@ CombRevis$Diff_HC <- (CombRevis$Honohan2003.Fiscal - CombRevis$Caprio1996.Fiscal
 
 #### Create indicator for whether or not data was revised by Laeven and Valencia (2012)
 CombRevis$Revision <- 0
-CombRevis$Revision[CombRevis$Diff_LVH > 0] <- 1
-CombRevis$Revision[CombRevis$Diff_LVC > 0] <- 1
+CombRevis$Revision[(abs(CombRevis$Diff_LVH) > 0 & CombRevis$LV2012.Fiscal != CombRevis$Caprio1996.Fiscal)] <- 1
+CombRevis$Revision[abs(CombRevis$Diff_LVC) > 0] <- 1
 
 CombRevis <- NaVar(CombRevis, c('LV2012.Fiscal', 'Honohan2003.Fiscal', 'Caprio1996.Fiscal'))
-CombRevis$Revision[CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Honohan2003.Fiscal == 1] <- 1
-CombRevis$Revision[CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Caprio1996.Fiscal == 1] <- 1
+CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Honohan2003.Fiscal == 1 & 
+                     CombRevis$LV2012.Fiscal != CombRevis$Caprio1996.Fiscal)] <- 1
+CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal %in% 0 & CombRevis$Miss_Caprio1996.Fiscal %in% 1 & 
+                      CombRevis$year < 1996)] <- 1
+
+# Recode Philipinnes as no change as change was caused by a coding error in Honohan & Klingebiel (2003)
+CombRevis$Revision[Main$iso2c %in% 'PH' & Main$year %in% 1983] <- 0
 
 
 write.dta(CombRevis, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
