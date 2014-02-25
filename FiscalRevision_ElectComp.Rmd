@@ -1,0 +1,118 @@
+# Fiscal Costs Revisions and Electoral Competitiveness
+
+### 24 February 2014
+
+We examined revisions between three data sets of fiscal costs from crises that build on one another:
+
+- Caprio and Klingebiel (1996)
+
+- Honohan and Klingebiel (2003)
+
+- Laeven and Valencia (2012)
+
+Revisions are simply defined as $r = F_{t2} - F_{t1}$ where $F_{t2}$ is a data set published after $F_{t1}$.
+
+Let's examine if revisions to fiscal costs figures could have led to Keefer's electoral competitiveness finding becoming statistically insignificant when we replicated his models with updated data. First let's compare the revisions made for low vs. high competetiveness countries. The low/high determination was made by creating a dummy marked 'high' if the forward/backward lag was greater than or less than 0.8. All other non-missing values were designated 'low competitiveness'.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(foreign)
+library(DataCombine)
+library(ggplot2)
+library(gridExtra)
+library(reshape2)
+
+# Load data
+Main <- read.dta('/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
+
+# Explore revisions
+Main$HiComp = 1
+Main$HiComp[Main$DiEiec33 < 0.8] <- 0
+
+Main$Diff_LVH <- (Main$LV2012_Fiscal - Main$Honohan2003_Fiscal)
+Main$Diff_LVC <- (Main$LV2012_Fiscal - Main$Caprio1996_Fiscal)
+Main$Diff_HC <- (Main$Honohan2003_Fiscal - Main$Caprio1996_Fiscal)
+
+MainDiffSub <- Main[, c('year', 'iso2c', 'Diff_HC', 'Diff_LVC', 'Diff_LVH', 'HiComp')]
+names(MainDiffSub) <- c('year', 'iso2c', 'Honohan/Kling. 2003. vs. Caprio/Kling. 1996', 
+                        'Laeven/Valencia 2012 vs. Caprio/Kling. 1996',
+                        'Laeven/Valencia 2012 vs. Honohan/Kling. 2003', 'HiComp')
+MainMoltenHigh <- subset(MainDiffSub, HiComp == 1)
+MainMoltenLow <- subset(MainDiffSub, HiComp == 0)
+
+MainDiffSub <- VarDrop(MainDiffSub, 'HiComp')
+MainMoltenHigh <- VarDrop(MainMoltenHigh, 'HiComp')
+MainMoltenLow <- VarDrop(MainMoltenLow, 'HiComp')
+
+MainMolten <- melt(MainDiffSub, id.vars = c('year', 'iso2c'))
+MainMoltenHigh <- melt(MainMoltenHigh, id.vars = c('year', 'iso2c'))
+MainMoltenLow <- melt(MainMoltenLow, id.vars = c('year', 'iso2c'))
+
+MainMolten$AbsError <- abs(MainMolten$value)
+MainMoltenHigh$AbsError <- abs(MainMoltenHigh$value)
+MainMoltenLow$AbsError <- abs(MainMoltenLow$value)
+
+## Raw value
+ggplot(MainMolten, aes(year, value, label = iso2c)) + facet_grid(. ~ variable) + 
+  geom_jitter(position = position_jitter(width = .5, height = 0), size = 3) +
+  geom_text(angle = 30, vjust = -1) +
+  stat_smooth(method = "lm") +
+  scale_x_continuous(limits = c(1975, 2001)) +
+  ggtitle('Not differentiated by electoral comp.\n') + xlab('') +
+  theme_bw()
+
+ggplot(MainMoltenHigh, aes(year, value, label = iso2c)) + facet_grid(. ~ variable) + 
+  geom_jitter(position = position_jitter(width = .5, height = 0), size = 3) +
+  geom_text(angle = 30, vjust = -1) +
+  stat_smooth(method = "lm") +
+  scale_x_continuous(limits = c(1975, 2001)) +
+  ggtitle('High electoral comp.\n') + xlab('') +
+  theme_bw()
+
+ggplot(MainMoltenLow, aes(year, value, label = iso2c)) + facet_grid(. ~ variable) + 
+  geom_jitter(position = position_jitter(width = .5, height = 0), size = 3) +
+  geom_text(angle = 30, vjust = -1) +
+  stat_smooth(method = "lm") +
+  scale_x_continuous(limits = c(1975, 2001)) +
+  ggtitle('Low electoral comp.\n') + xlab('') +
+  theme_bw()
+```
+
+
+```{r message=FALSE, echo=FALSE}
+# Electoral competetiveness of countries with missing data in Keefer & LV 2012 
+Main <- NaVar(Main, c('Keefer2007_Fiscal', 'LV2012_Fiscal', 'Caprio1996_Fiscal'))
+
+MainSub1 <- subset(Main, year <= 2000)
+MainSub1 <- subset(MainSub1, Miss_Keefer2007_Fiscal == 1 & Miss_LV2012_Fiscal == 0)
+
+hist(MainSub1$DiEiec33, main = 'Missing in Keefer Compared to LV')
+
+MainSub2 <- subset(Main, year <= 1995)
+MainSub2 <- subset(MainSub2, Miss_Caprio1996_Fiscal == 1 & Miss_LV2012_Fiscal == 0)
+
+hist(MainSub2$DiEiec33, main = 'Missing in Caprio/Klingebiel Compared to LV')
+```
+
+## Thoughts
+
+- Are more democratic countries more likely to release new information?
+
+- Are countries that experience a regime change more likely to release new information?
+
+
+### GDP or GNP
+
+We noticed an issues that may bring into question the comparability of some of the figures. For five of the crises in the Caprio and Klingebiel (1996) data set costs are given in terms of gross national product rather than gross domestic product. This was the case for five crises:
+
+- Ghana 1982
+
+- Malaysia 1985
+
+- Spain 1977
+
+- Thailand 1983
+
+- Turkey 1982
+
+In the cases of Ghana, Thailand, and Turkey the same number is reported in both Laeven and Valencia (2012) and Caprio and Klingebiel (1996), though in the later they are described as being as % of GDP, not GNP.
+
