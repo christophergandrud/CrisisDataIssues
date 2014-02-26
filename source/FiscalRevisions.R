@@ -57,7 +57,7 @@ MNon3 <- zelig(YearMergeRevise ~ checks + eiec, data = Main, model = 'logit', ci
                method = 'weave')
 MNon4 <- zelig(YearMergeRevise ~ checks + eiec + stabns, data = Main, model = 'logit',
                method = 'weave', cite = FALSE)
-MNon5 <- zelig(YearMergeRevise ~ checks + DiEiecLag3 + log(GDPperCapita), data = Main, 
+MNon5 <- zelig(YearMergeRevise ~ checks + eiec + log(GDPperCapita), data = Main, 
                model = 'logit', cite = FALSE, method = 'weave')
 
 # Three years before

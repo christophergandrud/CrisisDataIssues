@@ -84,12 +84,19 @@ SubKeefer <- SubKeefer[, c('iso2c', 'year', 'ChecksResiduals33')]
 ## Lags
 DpiData <- ddply(DpiData, .(country), transform, DiEiecLag3 = rollmean3r(DiEiec))
 DpiData <- ddply(DpiData, .(country), transform, ChecksLag3 = rollmean3r(checks))
+DpiData <- ddply(DpiData, .(country), transform, allhouseLag3 = rollmean3r(allhouse))
 
 ### Checks residuals 3 year lag
-SubLag <- DropNA(DpiData, c('DiEiecLag3', 'ChecksLag3'))
-ResidLag <- lm(DiEiecLag3 ~ ChecksLag3, data = SubLag)
-SubLag$ChecksResidualsLag3 <- ResidLag$residuals
-SubLag <- SubLag[, c('iso2c', 'year', 'ChecksResidualsLag3')]
+SubLag <- DropNA(DpiData, c('DiEiecLag3', 'allhouseLag3'))
+ResidLag <- lm(DiEiecLag3 ~ allhouseLag3, data = SubLag)
+SubLag$allhouseResidualsLag3 <- ResidLag$residuals
+SubLag <- SubLag[, c('iso2c', 'year', 'allhouseResidualsLag3')]
+
+### Allhous residuals 3 year lag
+SubLagAll <- DropNA(DpiData, c('DiEiecLag3', 'ChecksLag3'))
+ResidLag <- lm(DiEiecLag3 ~ ChecksLag3, data = SubLagAll)
+SubLagAll$ChecksResidualsLag3 <- ResidLag$residuals
+SubLagAll <- SubLagAll[, c('iso2c', 'year', 'ChecksResidualsLag3')]
 
 ## Leads
 DpiData <- ddply(DpiData, .(country), transform, DiEiecLead3 = rollmean3f(DiEiec))
@@ -167,6 +174,7 @@ WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'IncomeLead3', '
 ##### Combine data sets
 Comb <- dMerge(DpiData, SubKeefer, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLag, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, SubLagAll, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLead, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLead3, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLeadAll, Var = c('iso2c', 'year'), all.x = TRUE)

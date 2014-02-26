@@ -1,4 +1,4 @@
-I tested a number of different lag-lead type variables. Below are results from three types:
+I tested a number of different lag-lead type variables in logistic models with Revisions as the dependent variable. Below are results from three types:
 
 - No lag or lead
 
@@ -8,9 +8,70 @@ I tested a number of different lag-lead type variables. Below are results from t
 
 I also examined Keefer's original 3 year lag-lead variables, but they are basically just a composit of the lag and lead results and are therefore less informative for this exploration.
 
-You can download the most recent Stata formatted version of the data from: []()
+You can download the most recent Stata formatted version of the data from: [https://github.com/christophergandrud/CrisisDataIssues/blob/master/data/KeeferExtended.dta?raw=true](https://github.com/christophergandrud/CrisisDataIssues/blob/master/data/KeeferExtended.dta?raw=true). The dependent variable is called **YearMergeRevise**.
 
-The dependent variable is a dummy equalling 1 if 
+The dependent variable is a dummy equalling 1 if a revision was made in Laeven and Valencia (2012) compared to an earlier data set (Honohan and Klingebiel 2003 or Caprio and Klingebiel 1996) for a given country-crisis and 0 otherwise. A large part of the day yesterday was spent cleaning up this variable. I can go into details if you like. One important note is that to avoid double (or triple) counting individual crises, if a crisis is marked as having different start dates I only included the start date given in Laeven and Valencia (2012). Changing start dates counted as a data revision. For example, earlier data sets mark Mexico's mid-1990s crisis as starting in 1995, but Laeven and Valencia (2012) mark it as starting in 1994. So the Mexico 1995 observations are dropped and 1994 is counted as having a revision. 
+
+Full details of the changes I made are embedded in the code [here](https://github.com/christophergandrud/CrisisDataIssues/blob/master/source/RevisedRevision.R) and lines 188-210 [here](https://github.com/christophergandrud/CrisisDataIssues/blob/master/source/DataCreators/KeeferDataExtender.R).
+
+I only included crises before 2001, as it wouldn't make sense to include crises that aren't included in the pre-Laeven and Valencia (2012) data sets. All models use WEAVE robust standard errors. These are identical to using vce(cluster country) in Stata.
+
+```{r include=FALSE}
+# Load packages
+library(foreign)
+library(DataCombine)
+library(ggplot2)
+library(gridExtra)
+library(reshape2)
+library(Zelig)
+library(texreg)
+
+# Load data
+Main <- read.dta('/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
+
+#### Examine if any revisions were made
+Main = Main[Main$year <= 2000, ] # pre-Laeven and Valencia data only goes to 2000 
+
+Main <- DropNA(Main, 'YearMergeRevise')
+```
 
 ## No Lag or Lead
-```{r, echo=FALSE}
+
+As a baseline these are the results from variables without a lag or a lead. Note: `DiEiec` is the dichotomous electoral competetiveness variable.
+
+```{r results='asis', echo=FALSE}
+MNon1 <- zelig(YearMergeRevise ~ checks , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MNon2 <- zelig(YearMergeRevise ~ allhouse , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MNon3 <- zelig(YearMergeRevise ~ checks + DiEiec, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MNon4 <- zelig(YearMergeRevise ~ allhouse + DiEiec, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MNon5 <- zelig(YearMergeRevise ~ checks + DiEiec + stabns, data = Main, model = 'logit',
+               method = 'weave', cite = FALSE)
+MNon6 <- zelig(YearMergeRevise ~ checks + DiEiec + log(GDPperCapita), data = Main, 
+               model = 'logit', cite = FALSE, method = 'weave')
+htmlreg(list(MNon1, MNon2, MNon3, MNon4, MNon5, MNon6), caption = 'No Lags or Leads')
+
+```
+
+## Average of 3 years before the crisis start date
+
+The following results use independent variables that are the average value for the three years before the crisis start year. Note that, as in Keefer, **checks** and **allhouse** are the residuals of a regression with **DiEiec** to separate out the unique **checks**/**allhouse** component.
+
+```{r results='asis', echo=FALSE}
+MLag1 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag2 <- zelig(YearMergeRevise ~ allhouseResidualsLag3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag2 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag3 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + stabnsLag3, data = Main, model = 'logit',
+               method = 'weave', cite = FALSE)
+MLag4 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + log(GDPperCapita), data = Main, 
+               model = 'logit', cite = FALSE, method = 'weave')
+
+htmlreg(list(MNon1, MNon2, MNon3, MNon4, MNon5, MNon6), caption = 'Average of Three Years Before Crisis Start')
+
+```
