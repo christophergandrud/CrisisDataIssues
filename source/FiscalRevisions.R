@@ -67,7 +67,7 @@ MLag2 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3, data = Main, 
                method = 'weave')
 MLag3 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + stabnsLag3, data = Main, model = 'logit',
                method = 'weave', cite = FALSE)
-MLag4 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + log(GDPperCapita), data = Main, 
+MLag4 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + log(IncomeLag3), data = Main, 
                model = 'logit', cite = FALSE, method = 'weave')
 
 # Three years after

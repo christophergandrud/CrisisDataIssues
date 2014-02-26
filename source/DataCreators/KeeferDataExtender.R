@@ -129,7 +129,6 @@ SubLead3 <- SubLead3[, c('iso2c', 'year', 'ChecksResidualsLead5_2')]
 
 
 
-
 ##### Winset and selectorate data ####
 Win <- WinsetCreator()
 Win <- VarDrop(Win, 'country')
@@ -167,7 +166,7 @@ Wdi$CurrentAccountMinus <- Wdi$CurrentAccount - Wdi$CurrentAccountLag1
 Wdi$Terms <- Wdi$Exports/Wdi$Imports
 Wdi <- PercChange(Wdi, Var = 'Terms', GroupVar = 'country', NewVar = 'TermsChange', type = 'proportion')
 
-WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'IncomeLead3', 'Growth33', 'GrowthLead3', 
+WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'IncomeLag3', 'IncomeLead3', 'Growth33', 'GrowthLead3', 
                    'CurrentAccountLag1', 'CurrentAccountMinus', 'TotalGDP', 'GDPLead3',
                    'TermsChange', 'Reserves')]
 
