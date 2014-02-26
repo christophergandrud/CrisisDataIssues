@@ -1,7 +1,7 @@
 ################
 # Keefer (2007) data extender
 # Christopher Gandrud
-# 25 February 2014
+# 26 February 2014
 ###############
 
 # Load packages
@@ -56,7 +56,7 @@ PolityData <- DropNA(PolityData, c('polity2'))
 PolityData <- VarDrop(PolityData, 'country')
 
 #### Database of Political Institutions data 
-dpiVars <- c('eiec', 'checks', 'stabns')
+dpiVars <- c('eiec', 'checks', 'stabns', 'allhouse')
 DpiData <- DpiGet(vars = dpiVars, OutCountryID = 'iso2c', duplicates = 'drop')
 DpiData[, dpiVars][DpiData[, dpiVars] == -999] <- NA
 # DpiData <- DropNA(DpiData, c('eiec', 'checks'))
@@ -71,7 +71,7 @@ DpiData$DiEiec[DpiData$eiec >= 6] <- 1
 DpiData <- ddply(DpiData, .(country), transform, DiEiec33 = rollmean33(DiEiec))
 DpiData <- ddply(DpiData, .(country), transform, Checks33 = rollmean33(checks))
 
-# Create Keefer backwards lag
+# Create Keefer political stability backwards lag
 DpiData <- ddply(DpiData, .(country), transform, stabnsLag3 = rollmean3r(stabns))
 
 # Find residuals for lagged check (modified from Keefer)
@@ -95,6 +95,7 @@ SubLag <- SubLag[, c('iso2c', 'year', 'ChecksResidualsLag3')]
 DpiData <- ddply(DpiData, .(country), transform, DiEiecLead3 = rollmean3f(DiEiec))
 DpiData <- ddply(DpiData, .(country), transform, ChecksLead3 = rollmean3f(checks))
 DpiData <- ddply(DpiData, .(country), transform, stabnsLead3 = rollmean3f(stabns))
+DpiData <- ddply(DpiData, .(country), transform, allhouseLead3 = rollmean3f(allhouse))
 
 ### Checks residuals 3 year lead
 SubLead <- DropNA(DpiData, c('DiEiecLead3', 'ChecksLead3'))
@@ -121,20 +122,23 @@ Win <- VarDrop(Win, 'country')
 Countries <- unique(DpiData$iso2c)
 Wdi <- WDI(country = Countries,
            indicator = c('NY.GDP.PCAP.PP.KD', 'NY.GDP.PCAP.KD.ZG', 'BN.CAB.XOKA.GD.ZS', 'BM.GSR.GNFS.CD', 
-                         'BX.GSR.GNFS.CD', 'FI.RES.TOTL.DT.ZS'),
+                         'BX.GSR.GNFS.CD', 'FI.RES.TOTL.DT.ZS', 'NY.GDP.MKTP.CD'),
            start = 1970, end = 2012)
 names(Wdi) <- c('iso2c', 'country', 'year', 'GDPperCapita', 'GDPChange', 'CurrentAccount', 
-                'Imports', 'Exports', 'Reserves')
+                'Imports', 'Exports', 'Reserves', 'TotalGDP')
 Wdi <- Wdi[order(Wdi$country, Wdi$year), ]
 
 ## Create transformed variables
 # Income
 Wdi <- ddply(Wdi, .(country), transform, Income33 = rollmean33(GDPperCapita))
-Wdi <- slideMA(DpiData, Var = GDPperCapita, GroupVar = 'country', periodBound = 3, NewVar = 'IncomeLead3')
+Wdi <- slideMA(Wdi, Var = 'GDPperCapita', GroupVar = 'country', periodBound = 3, NewVar = 'IncomeLead3')
 
 # Growth
 Wdi <- ddply(Wdi, .(country), transform, Growth33 = rollmean33(GDPChange))
-Wdi <- slideMA(DpiData, Var = GDPChange, GroupVar = 'country', periodBound = 3, NewVar = 'GrowthLead3')
+Wdi <- slideMA(Wdi, Var = 'GDPChange', GroupVar = 'country', periodBound = 3, NewVar = 'GrowthLead3')
+
+# Total GDP
+Wdi <- slideMA(Wdi, Var = 'TotalGDP', GroupVar = 'country', periodBound = 3, NewVar = 'GDPLead3')
 
 # CurrentAccount 1
 Wdi <- slide(Wdi, Var = 'CurrentAccount', GroupVar = 'country', NewVar = 'CurrentAccountLag1')
@@ -146,7 +150,8 @@ Wdi$CurrentAccountMinus <- Wdi$CurrentAccount - Wdi$CurrentAccountLag1
 Wdi$Terms <- Wdi$Exports/Wdi$Imports
 Wdi <- PercChange(Wdi, Var = 'Terms', GroupVar = 'country', NewVar = 'TermsChange', type = 'proportion')
 
-WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'Growth33', 'CurrentAccountLag1', 'CurrentAccountMinus',
+WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'IncomeLead3', 'Growth33', 'GrowthLead3', 
+                   'CurrentAccountLag1', 'CurrentAccountMinus', 'TotalGDP', 'GDPLead3',
                    'TermsChange', 'Reserves')]
 
 ##### Combine data sets
@@ -180,7 +185,7 @@ CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal %in% 0 & CombRevis$Miss_Caprio1
                       CombRevis$year < 1996)] <- 1
 
 # Recode Philipinnes as no change as change was caused by a coding error in Honohan & Klingebiel (2003)
-CombRevis$Revision[Main$iso2c %in% 'PH' & Main$year %in% 1983] <- 0
+CombRevis$Revision[CombRevis$iso2c %in% 'PH' & CombRevis$year %in% 1983] <- 0
 
 # Merge years assuming that LV (2012) has correct start year
 source('/git_repositories/CrisisDataIssues/source/RevisedRevision.R')
@@ -188,6 +193,7 @@ source('/git_repositories/CrisisDataIssues/source/RevisedRevision.R')
 # Save to Stata format
 write.dta(CombRevis, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 
+############################################################  
 ##### Create Reinhart and Rogoff (2010) combination #####
 
 ## Download RR crisis data
