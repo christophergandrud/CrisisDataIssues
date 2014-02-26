@@ -103,18 +103,27 @@ ResidLead <- lm(DiEiecLead3 ~ ChecksLead3, data = SubLead)
 SubLead$ChecksResidualsLead3 <- ResidLead$residuals
 SubLead <- SubLead[, c('iso2c', 'year', 'ChecksResidualsLead3')]
 
-### Create 3 year leads for time periods begining 3 years in the future
+### Allhouse residuals 3 year lead
+SubLeadAll <- DropNA(DpiData, c('DiEiecLead3', 'allhouseLead3'))
+ResidLeadAll <- lm(DiEiecLead3 ~ allhouseLead3, data = SubLeadAll)
+SubLeadAll$allhouseResidualsLead3 <- ResidLeadAll$residuals
+SubLeadAll <- SubLeadAll[, c('iso2c', 'year', 'allhouseResidualsLead3')]
+
+### Create 3 year leads for time periods begining 2 years in the future
 DpiData <- slideMA(DpiData, Var = 'DiEiec', GroupVar = 'country', periodBound = 5, offset = 2)
 DpiData <- slideMA(DpiData, Var = 'checks', GroupVar = 'country', periodBound = 5, offset = 2)
 DpiData <- slideMA(DpiData, Var = 'stabns', GroupVar = 'country', periodBound = 5, offset = 2)
 
-### Checks residuals 3 year lead
+### Checks residuals leads for time periods begining 2 years in the future
 SubLead3 <- DropNA(DpiData, c('DiEiecMA5_2', 'checksMA5_2'))
 ResidLead3 <- lm(DiEiecMA5_2 ~ checksMA5_2, data = SubLead3)
 SubLead3$ChecksResidualsLead5_2 <- ResidLead3$residuals
 SubLead3 <- SubLead3[, c('iso2c', 'year', 'ChecksResidualsLead5_2')]
 
-# Winset and selectorate data
+
+
+
+##### Winset and selectorate data ####
 Win <- WinsetCreator()
 Win <- VarDrop(Win, 'country')
 
@@ -131,6 +140,7 @@ Wdi <- Wdi[order(Wdi$country, Wdi$year), ]
 ## Create transformed variables
 # Income
 Wdi <- ddply(Wdi, .(country), transform, Income33 = rollmean33(GDPperCapita))
+Wdi <- slideMA(Wdi, Var = 'GDPperCapita', GroupVar = 'country', periodBound = -3, NewVar = 'IncomeLag3')
 Wdi <- slideMA(Wdi, Var = 'GDPperCapita', GroupVar = 'country', periodBound = 3, NewVar = 'IncomeLead3')
 
 # Growth
@@ -159,6 +169,7 @@ Comb <- dMerge(DpiData, SubKeefer, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLag, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLead, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLead3, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, SubLeadAll, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, PolityData, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Win, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Fiscal, Var = c('iso2c', 'year'), all.y = TRUE)

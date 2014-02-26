@@ -1,0 +1,16 @@
+I tested a number of different lag-lead type variables. Below are results from three types:
+
+- No lag or lead
+
+- Average of three years before a crisis start year.
+
+- Average of three years after a crisis starty year.
+
+I also examined Keefer's original 3 year lag-lead variables, but they are basically just a composit of the lag and lead results and are therefore less informative for this exploration.
+
+You can download the most recent Stata formatted version of the data from: []()
+
+The dependent variable is a dummy equalling 1 if 
+
+## No Lag or Lead
+```{r, echo=FALSE}
