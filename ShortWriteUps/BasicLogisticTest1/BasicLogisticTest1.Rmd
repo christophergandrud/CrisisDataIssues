@@ -23,10 +23,6 @@ I only included crises before 2001, as it wouldn't make sense to include crises 
 ```{r include=FALSE}
 # Load packages
 library(foreign)
-library(DataCombine)
-library(ggplot2)
-library(gridExtra)
-library(reshape2)
 library(Zelig)
 library(texreg)
 
@@ -56,6 +52,7 @@ MNon5 <- zelig(YearMergeRevise ~ checks + DiEiec + stabns, data = Main, model = 
                method = 'weave', cite = FALSE)
 MNon6 <- zelig(YearMergeRevise ~ checks + DiEiec + log(GDPperCapita), data = Main, 
                model = 'logit', cite = FALSE, method = 'weave')
+
 htmlreg(list(MNon1, MNon2, MNon3, MNon4, MNon5, MNon6), caption = 'No Lags or Leads')
 
 ```

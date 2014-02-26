@@ -92,7 +92,7 @@ ResidLag <- lm(DiEiecLag3 ~ allhouseLag3, data = SubLag)
 SubLag$allhouseResidualsLag3 <- ResidLag$residuals
 SubLag <- SubLag[, c('iso2c', 'year', 'allhouseResidualsLag3')]
 
-### Allhous residuals 3 year lag
+### Allhouse residuals 3 year lag
 SubLagAll <- DropNA(DpiData, c('DiEiecLag3', 'ChecksLag3'))
 ResidLag <- lm(DiEiecLag3 ~ ChecksLag3, data = SubLagAll)
 SubLagAll$ChecksResidualsLag3 <- ResidLag$residuals
@@ -127,11 +127,19 @@ ResidLead3 <- lm(DiEiecMA5_2 ~ checksMA5_2, data = SubLead3)
 SubLead3$ChecksResidualsLead5_2 <- ResidLead3$residuals
 SubLead3 <- SubLead3[, c('iso2c', 'year', 'ChecksResidualsLead5_2')]
 
-
-
 ##### Winset and selectorate data ####
 Win <- WinsetCreator()
 Win <- VarDrop(Win, 'country')
+
+#### IMF program
+IMF <- IMF_WBGet(sheets = c('IMF SBA 5', 'IMF EFF 5', 'IMF SAF 5'))
+IMF <- DropNA(IMF, 'IMF.SBA.5')
+IMF$IMFProgramAny <- 0
+IMF$IMFProgramAny[IMF$IMF.SBA.5 == 1 | IMF$IMF.EFF.5 == 1 | IMF$IMF.SAF.5 == 1] <- 1
+IMF <- IMF[order(IMF$country, IMF$year), ]
+
+IMF <- slideMA(IMF, Var = 'IMFProgramAny', GroupVar = 'country', periodBound = 3, NewVar = 'IMFProgramLead3')
+IMF <- VarDrop(IMF, 'country')
 
 #### Economic Data from the World Bank Development Indicators
 Countries <- unique(DpiData$iso2c)
@@ -178,6 +186,7 @@ Comb <- dMerge(Comb, SubLead, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLead3, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLeadAll, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, PolityData, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, IMF, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Win, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Fiscal, Var = c('iso2c', 'year'), all.y = TRUE)
 Comb <- dMerge(Comb, WdiSlim, Var = c('iso2c', 'year'), all.x = TRUE)

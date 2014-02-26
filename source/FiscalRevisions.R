@@ -53,44 +53,56 @@ MNon1 <- zelig(YearMergeRevise ~ checks , data = Main, model = 'logit', cite = F
                method = 'weave')
 MNon2 <- zelig(YearMergeRevise ~ allhouse , data = Main, model = 'logit', cite = FALSE, 
                method = 'weave')
-MNon3 <- zelig(YearMergeRevise ~ checks + eiec, data = Main, model = 'logit', cite = FALSE, 
+MNon3 <- zelig(YearMergeRevise ~ checks + DiEiec, data = Main, model = 'logit', cite = FALSE, 
                method = 'weave')
-MNon4 <- zelig(YearMergeRevise ~ checks + eiec + stabns, data = Main, model = 'logit',
+MNon4 <- zelig(YearMergeRevise ~ allhouse + DiEiec, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MNon5 <- zelig(YearMergeRevise ~ checks + DiEiec + stabns, data = Main, model = 'logit',
                method = 'weave', cite = FALSE)
-MNon5 <- zelig(YearMergeRevise ~ checks + eiec + log(GDPperCapita), data = Main, 
+MNon6 <- zelig(YearMergeRevise ~ checks + DiEiec + log(GDPperCapita), data = Main, 
                model = 'logit', cite = FALSE, method = 'weave')
 
 # Three years before
-MLag1 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 , data = Main, model = 'logit', cite = FALSE, 
+MLag1 <- zelig(YearMergeRevise ~ ChecksLag3 , data = Main, model = 'logit', cite = FALSE, 
                method = 'weave')
-MLag2 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3, data = Main, model = 'logit', cite = FALSE, 
+MLag2 <- zelig(YearMergeRevise ~ allhouseLag3 , data = Main, model = 'logit', cite = FALSE, 
                method = 'weave')
-MLag3 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + stabnsLag3, data = Main, model = 'logit',
+MLag3 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag4 <- zelig(YearMergeRevise ~ allhouseResidualsLag3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag5 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag6 <- zelig(YearMergeRevise ~ allhouseResidualsLag3 + DiEiecLag3, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLag7 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + stabnsLag3, data = Main, model = 'logit',
                method = 'weave', cite = FALSE)
-MLag4 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + log(IncomeLag3), data = Main, 
+MLag8 <- zelig(YearMergeRevise ~ log(IncomeLag3), data = Main, 
+               model = 'logit', cite = FALSE, method = 'weave')
+MLag9 <- zelig(YearMergeRevise ~ ChecksResidualsLag3 + DiEiecLag3 + stabnsLag3 + log(IncomeLag3), data = Main, 
                model = 'logit', cite = FALSE, method = 'weave')
 
 # Three years after
-MLead1 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 , data = Main, model = 'logit', cite = FALSE, 
-                method = 'weave')
 MLead1 <- zelig(YearMergeRevise ~ ChecksLead3 , data = Main, model = 'logit', cite = FALSE, 
-                method = 'weave')
-MLead2 <- zelig(YearMergeRevise ~ allhouseLead3, data = Main, model = 'logit', cite = FALSE, 
-                method = 'weave')
-
-MLead2 <- zelig(YearMergeRevise ~ allhouseLead3 + log(IncomeLead3), data = Main, model = 'logit', cite = FALSE, 
-                method = 'weave')
-
-MLead3 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3, data = Main, model = 'logit', 
-                cite = FALSE, method = 'weave')
-MLead4 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3, data = Main, 
+               method = 'weave')
+MLead2 <- zelig(YearMergeRevise ~ allhouseLead3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLead3 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLead4 <- zelig(YearMergeRevise ~ allhouseResidualsLead3 , data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLead5 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLead6 <- zelig(YearMergeRevise ~ allhouseResidualsLead3 + DiEiecLead3, data = Main, model = 'logit', cite = FALSE, 
+               method = 'weave')
+MLead7 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3, data = Main, model = 'logit',
+               method = 'weave', cite = FALSE)
+MLead8 <- zelig(YearMergeRevise ~ log(IncomeLead3), data = Main, 
+               model = 'logit', cite = FALSE, method = 'weave')
+MLead9 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(IncomeLead3), data = Main, 
+               model = 'logit', cite = FALSE, method = 'weave')
+MLead10 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(IncomeLead3) + IMF_EFF_5, data = Main, 
                 model = 'logit', cite = FALSE, method = 'weave')
-MLead5 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + IncomeLead3, data = Main, 
-               model = 'logit', method = 'weave', cite = FALSE)
-MLead6 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(IncomeLead3), data = Main, 
-                model = 'logit', method = 'weave', cite = FALSE)
-MLead7 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(GDPLead3), data = Main, 
-                model = 'logit', method = 'weave', cite = FALSE)
 
 
 # Simple logistic regression (Remove Thailand outlier)
