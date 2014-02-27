@@ -107,18 +107,41 @@ MLead10 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLe
 Main$LogIncome <- log(Main$IncomeLead3)
 Main$LogIncomePoly2 <- Main$LogIncome^2
 
+MainNoNA <- DropNA(Main, c('YearMergeRevise', 'LogIncome', 'LogIncomePoly2'))
+
 MLead11 <- zelig(YearMergeRevise ~ LogIncome + LogIncomePoly2, data = Main, 
                  model = 'logit', cite = FALSE, method = 'weave')
 
-Mset <- setx(MLead11, LogIncome = 5:11, LogIncomePoly2 = )
+MLead11 <- zelig(YearMergeRevise ~ LogIncome, data = Main, 
+                 model = 'logit', cite = FALSE, method = 'weave')
 
+Mset <- setx(MLead11, LogIncome = 5:11)
+Msim <- sim(MLead11, Mset)
+plot.ci(Msim)
 
 MLead11 <- zelig(YearMergeRevise ~ AMCAnyLead3 + LogIncome + LogIncomePoly2, data = Main, 
                  model = 'logit', cite = FALSE, method = 'weave')
 
+
+MainSub <- DropNA(Main, 'LV2012_Fiscal')
+
+MLead11 <- zelig(YearMergeRevise ~ LogIncome, data = MainSub, 
+                 model = 'logit', cite = FALSE, method = 'weave')
 
 
 # Simple logistic regression (Remove Thailand outlier)
 MainTHSub <- Main[!(Main$iso2c %in% 'TH' & Main$year %in% 1997), ]
 M_TH <- zelig(YearMergeRevise ~ ChecksResiduals33 + DiEiec33, data = MainTHSub, model = 'logit', cite = FALSE, 
               method = 'weave')
+
+Main$FDI_GDP <- Main$FDILead3/Main$GDPLead3
+Main$FDIMillionsLead3 <- Main$FDILead3/1000000
+
+Main$FDIRescale <- log(Main$FDIMillionsLead3 + (abs(min(Main$FDIMillionsLead3, na.rm = TRUE)) + 0.1))
+MLead11 <- zelig(YearMergeRevise ~ FDIRescale + LogIncome, data = Main, 
+                 model = 'logit', cite = FALSE, method = 'weave')
+
+MLead11 <- glm(YearMergeRevise ~ FDIRescale + LogIncome, data = Main, 
+                 family = 'binomial')
+
+MainSub <- Main[-73, ]

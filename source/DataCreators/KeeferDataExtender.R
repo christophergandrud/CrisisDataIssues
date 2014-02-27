@@ -169,10 +169,10 @@ KunInstQual <- DropNA(KunInstQual, 'iso2c')
 Countries <- unique(DpiData$iso2c)
 Wdi <- WDI(country = Countries,
            indicator = c('NY.GDP.PCAP.PP.KD', 'NY.GDP.PCAP.KD.ZG', 'BN.CAB.XOKA.GD.ZS', 'BM.GSR.GNFS.CD', 
-                         'BX.GSR.GNFS.CD', 'FI.RES.TOTL.DT.ZS', 'NY.GDP.MKTP.CD'),
+                         'BX.GSR.GNFS.CD', 'FI.RES.TOTL.DT.ZS', 'FI.RES.TOTL.CD' 'NY.GDP.MKTP.CD', 'BX.KLT.DINV.CD.WD'),
            start = 1970, end = 2012)
 names(Wdi) <- c('iso2c', 'country', 'year', 'GDPperCapita', 'GDPChange', 'CurrentAccount', 
-                'Imports', 'Exports', 'Reserves', 'TotalGDP')
+                'Imports', 'Exports', 'Reserves', 'TotalReserves', 'TotalGDP', 'FDI')
 Wdi <- Wdi[order(Wdi$country, Wdi$year), ]
 
 ## Create transformed variables
@@ -198,9 +198,16 @@ Wdi$CurrentAccountMinus <- Wdi$CurrentAccount - Wdi$CurrentAccountLag1
 Wdi$Terms <- Wdi$Exports/Wdi$Imports
 Wdi <- PercChange(Wdi, Var = 'Terms', GroupVar = 'country', NewVar = 'TermsChange', type = 'proportion')
 
+# Total reserves
+Wdi <- slideMA(Wdi, Var = 'TotalReserves', GroupVar = 'country', periodBound = 3, NewVar = 'TotalReservesLead3')
+
+# FDI
+Wdi <- slideMA(Wdi, Var = 'FDI', GroupVar = 'country', periodBound = 3, NewVar = 'FDILead3')
+
+
 WdiSlim <- Wdi[, c('iso2c', 'year', 'GDPperCapita', 'Income33', 'IncomeLag3', 'IncomeLead3', 'Growth33', 'GrowthLead3', 
                    'CurrentAccountLag1', 'CurrentAccountMinus', 'TotalGDP', 'GDPLead3',
-                   'TermsChange', 'Reserves')]
+                   'TermsChange', 'Reserves', 'TotalReserves', 'TotalReservesLead3', 'FDI', 'FDILead3')]
 
 ##### Combine data sets
 Comb <- dMerge(DpiData, SubKeefer, Var = c('iso2c', 'year'), all.x = TRUE)
@@ -246,7 +253,12 @@ source('/git_repositories/CrisisDataIssues/source/RevisedRevision.R')
 # Save to Stata format
 write.dta(CombRevis, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 
-############################################################  
+
+
+
+
+
+
 ##### Create Reinhart and Rogoff (2010) combination #####
 
 ## Download RR crisis data
