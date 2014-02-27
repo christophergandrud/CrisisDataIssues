@@ -148,12 +148,31 @@ AMC <- CountryID(AMC, timeVar = 'year')
 AMC <- AMC[order(AMC$iso2c, AMC$year), ]
 
 # Create 3 year lag
-nyears <- 1:3
+nyears <- -1:-3
+
 for (i in nyears){
   New <- paste0('AMCAny', i)
-  AMC <- slide(AMC, Var = 'AMCAnyCreated', GroupVar = 'country', NewVar = New, slideBy = i)
+  temp <- slide(AMC, Var = 'AMCAnyCreated', GroupVar = 'iso2c', NewVar = New, slideBy = i)
+  
+  MainNames <- names(AMC)
+  if (length(temp) != nrow(AMC)){
+    AMC <- AMC[(AMC[, 'iso2c'] %in% temp[, 'iso2c']), ]
+  }
+  temp <- temp[, New]
+  
+  AMC <- data.frame(AMC, temp)
+  names(AMC) <- c(MainNames, New)
 }
 
+tempNames <- 'AMCAnyCreated'
+for (i in nyears){
+  temp <- paste0('AMCAny', i)
+  tempNames <- append(tempNames, temp)
+}
+AMC[, 'AMCSpred3'] <- AMC[, 'AMCAnyCreated']
+for (i in tempNames){
+AMC[, 'AMCSpred3'][AMC[, i] == 1] <- 1
+}
 
 #### Economic Data from the World Bank Development Indicators
 Countries <- unique(DpiData$iso2c)
