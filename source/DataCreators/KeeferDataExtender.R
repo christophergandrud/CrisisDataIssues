@@ -1,7 +1,7 @@
 ################
 # Keefer (2007) data extender
 # Christopher Gandrud
-# 26 February 2014
+# 27 February 2014
 ###############
 
 # Load packages
@@ -140,6 +140,20 @@ IMF <- IMF[order(IMF$country, IMF$year), ]
 
 IMF <- slideMA(IMF, Var = 'IMFProgramAny', GroupVar = 'country', periodBound = 3, NewVar = 'IMFProgramLead3')
 IMF <- VarDrop(IMF, 'country')
+
+#### AMC ####
+AMC <- read.csv(file = '/git_repositories/amcData/MainData/CleanedPartial/AMCFull.csv')
+AMC <- AMC[, c('country', 'year', 'AMCAnyCreated')]
+AMC <- CountryID(AMC, timeVar = 'year')
+AMC <- AMC[order(AMC$iso2c, AMC$year), ]
+
+# Create 3 year lag
+nyears <- 1:3
+for (i in nyears){
+  New <- paste0('AMCAny', i)
+  AMC <- slide(AMC, Var = 'AMCAnyCreated', GroupVar = 'country', NewVar = New, slideBy = i)
+}
+
 
 #### Economic Data from the World Bank Development Indicators
 Countries <- unique(DpiData$iso2c)
