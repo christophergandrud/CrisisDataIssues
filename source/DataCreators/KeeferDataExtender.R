@@ -12,6 +12,7 @@ library(forecast)
 library(plyr)
 library(WDI)
 library(foreign)
+library(repmis)
 
 # Fuction for keefer rolling 3 year averages
 rollmean3r <- function(x){
@@ -138,7 +139,8 @@ IMF$IMFProgramAny <- 0
 IMF$IMFProgramAny[IMF$IMF.SBA.5 == 1 | IMF$IMF.EFF.5 == 1 | IMF$IMF.SAF.5 == 1] <- 1
 IMF <- IMF[order(IMF$country, IMF$year), ]
 
-IMF <- slideMA(IMF, Var = 'IMFProgramAny', GroupVar = 'country', periodBound = 3, NewVar = 'IMFProgramLead3')
+IMF <- SpreadDummy(IMF, Var = 'IMFProgramAny', GroupVar = 'country', spreadBy = -3, NewVar = 'IMFProgramLag3')
+IMF <- SpreadDummy(IMF, Var = 'IMFProgramAny', GroupVar = 'country', spreadBy = 3, NewVar = 'IMFProgramLead3')
 IMF <- VarDrop(IMF, 'country')
 
 #### AMC ####
@@ -146,33 +148,22 @@ AMC <- read.csv(file = '/git_repositories/amcData/MainData/CleanedPartial/AMCFul
 AMC <- AMC[, c('country', 'year', 'AMCAnyCreated')]
 AMC <- CountryID(AMC, timeVar = 'year')
 AMC <- AMC[order(AMC$iso2c, AMC$year), ]
+AMC$AMCAnyCreated <- as.numeric(AMC$AMCAnyCreated)
 
-# Create 3 year lag
-nyears <- -1:-3
+AMC <- SpreadDummy(data = AMC, Var = 'AMCAnyCreated', GroupVar = 'iso2c', spreadBy = -3, NewVar = 'AMCAnyLag3')
+AMC <- SpreadDummy(data = AMC, Var = 'AMCAnyCreated', GroupVar = 'iso2c', spreadBy = 3, NewVar = 'AMCAnyLead3')
 
-for (i in nyears){
-  New <- paste0('AMCAny', i)
-  temp <- slide(AMC, Var = 'AMCAnyCreated', GroupVar = 'iso2c', NewVar = New, slideBy = i)
-  
-  MainNames <- names(AMC)
-  if (length(temp) != nrow(AMC)){
-    AMC <- AMC[(AMC[, 'iso2c'] %in% temp[, 'iso2c']), ]
-  }
-  temp <- temp[, New]
-  
-  AMC <- data.frame(AMC, temp)
-  names(AMC) <- c(MainNames, New)
-}
+AMC <- AMC[, c('iso2c', 'year', 'AMCAnyCreated', 'AMCAnyLag3', 'AMCAnyLead3')]
 
-tempNames <- 'AMCAnyCreated'
-for (i in nyears){
-  temp <- paste0('AMCAny', i)
-  tempNames <- append(tempNames, temp)
-}
-AMC[, 'AMCSpred3'] <- AMC[, 'AMCAnyCreated']
-for (i in tempNames){
-AMC[, 'AMCSpred3'][AMC[, i] == 1] <- 1
-}
+#### Kuncic institutional quality indicators ####
+URL <- "https://docs.google.com/spreadsheet/pub?key=0AtSgiY60tn0_dEtYUVo4TWlFOU01dnRjTE1WZmFTUWc&single=true&gid=0&output=csv"  
+KunInstQual <- source_data(URL, sep = ",", header = TRUE)
+KunInstQual$iso2c <- countrycode(KunInstQual$wbcode, 
+                                 origin = 'wb', destination = 'iso2c')
+KunInstQual <- KunInstQual[, c('iso2c', 'country', 'year', 'economic_abs',
+                               'legal_abs', 'political_abs')]
+KunInstQual <- VarDrop(KunInstQual, 'country')
+KunInstQual <- DropNA(KunInstQual, 'iso2c')
 
 #### Economic Data from the World Bank Development Indicators
 Countries <- unique(DpiData$iso2c)
@@ -220,6 +211,8 @@ Comb <- dMerge(Comb, SubLead3, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, SubLeadAll, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, PolityData, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, IMF, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, AMC, Var = c('iso2c', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, KunInstQual, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Win, Var = c('iso2c', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, Fiscal, Var = c('iso2c', 'year'), all.y = TRUE)
 Comb <- dMerge(Comb, WdiSlim, Var = c('iso2c', 'year'), all.x = TRUE)

@@ -101,8 +101,21 @@ MLead8 <- zelig(YearMergeRevise ~ log(IncomeLead3), data = Main,
                model = 'logit', cite = FALSE, method = 'weave')
 MLead9 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(IncomeLead3), data = Main, 
                model = 'logit', cite = FALSE, method = 'weave')
-MLead10 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(IncomeLead3) + IMF_EFF_5, data = Main, 
+MLead10 <- zelig(YearMergeRevise ~ ChecksResidualsLead3 + DiEiecLead3 + stabnsLead3 + log(IncomeLead3) + IMFProgramLead3, data = Main, 
                 model = 'logit', cite = FALSE, method = 'weave')
+
+Main$LogIncome <- log(Main$IncomeLead3)
+Main$LogIncomePoly2 <- Main$LogIncome^2
+
+MLead11 <- zelig(YearMergeRevise ~ LogIncome + LogIncomePoly2, data = Main, 
+                 model = 'logit', cite = FALSE, method = 'weave')
+
+Mset <- setx(MLead11, LogIncome = 5:11, LogIncomePoly2 = )
+
+
+MLead11 <- zelig(YearMergeRevise ~ AMCAnyLead3 + LogIncome + LogIncomePoly2, data = Main, 
+                 model = 'logit', cite = FALSE, method = 'weave')
+
 
 
 # Simple logistic regression (Remove Thailand outlier)
