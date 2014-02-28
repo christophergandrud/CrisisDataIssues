@@ -1,7 +1,7 @@
 ##############
 # Analysis of the causes of fiscal revisions
 # Christopher Gandrud
-# 26 February 2014
+# 28 February 2014
 ##############
 
 # Load packages
@@ -124,7 +124,8 @@ MLead11 <- zelig(YearMergeRevise ~ AMCAnyLead3 + LogIncome + LogIncomePoly2, dat
 
 
 MainSub <- DropNA(Main, 'LV2012_Fiscal')
-
+MainSub <- subset(Main, LogIncome >= 8)
+MainSub <- subset(Main, country != 'URUGUAY')
 MLead11 <- zelig(YearMergeRevise ~ LogIncome, data = MainSub, 
                  model = 'logit', cite = FALSE, method = 'weave')
 

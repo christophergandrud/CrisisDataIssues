@@ -169,7 +169,7 @@ KunInstQual <- DropNA(KunInstQual, 'iso2c')
 Countries <- unique(DpiData$iso2c)
 Wdi <- WDI(country = Countries,
            indicator = c('NY.GDP.PCAP.PP.KD', 'NY.GDP.PCAP.KD.ZG', 'BN.CAB.XOKA.GD.ZS', 'BM.GSR.GNFS.CD', 
-                         'BX.GSR.GNFS.CD', 'FI.RES.TOTL.DT.ZS', 'FI.RES.TOTL.CD' 'NY.GDP.MKTP.CD', 'BX.KLT.DINV.CD.WD'),
+                         'BX.GSR.GNFS.CD', 'FI.RES.TOTL.DT.ZS', 'FI.RES.TOTL.CD', 'NY.GDP.MKTP.CD', 'BX.KLT.DINV.CD.WD'),
            start = 1970, end = 2012)
 names(Wdi) <- c('iso2c', 'country', 'year', 'GDPperCapita', 'GDPChange', 'CurrentAccount', 
                 'Imports', 'Exports', 'Reserves', 'TotalReserves', 'TotalGDP', 'FDI')
@@ -240,9 +240,9 @@ CombRevis$Revision[abs(CombRevis$Diff_LVC) > 0] <- 1
 CombRevis <- NaVar(CombRevis, c('LV2012.Fiscal', 'Honohan2003.Fiscal', 'Caprio1996.Fiscal'))
 CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal == 0 & CombRevis$Miss_Honohan2003.Fiscal == 1 & 
                      CombRevis$LV2012.Fiscal != CombRevis$Caprio1996.Fiscal)] <- 1
-CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal == 0 & is.na(CombRevis$Caprio1996.Fiscal) & CombRevis$year < 1996)] <- 1
+CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal == 0 & is.na(CombRevis$Caprio1996.Fiscal) & CombRevis$year <= 1996)] <- 1
 CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal %in% 0 & CombRevis$Miss_Caprio1996.Fiscal %in% 1 & 
-                      CombRevis$year < 1996)] <- 1
+                      CombRevis$year <= 1996)] <- 1
 
 # Recode Philipinnes as no change as change was caused by a coding error in Honohan & Klingebiel (2003)
 CombRevis$Revision[CombRevis$iso2c %in% 'PH' & CombRevis$year %in% 1983] <- 0
