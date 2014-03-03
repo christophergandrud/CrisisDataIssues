@@ -84,7 +84,13 @@ As a basic test of this theory, let's look at if estimated costs are higher for 
 rLabels <- c('No Revision', 'Revision')
 Main$RevisionYMFactor <- factor(Main$YearMergeRevise, levels = c(0, 1), labels = rLabels)
 
-ggplot(Main, aes(LV2012_Fiscal, colour = RevisionYMFactor)) + geom_density() + theme_bw()
+MainDiEiecNoNA <- DropNA(Main, 'DiEiec')
+
+ggplot(MainDiEiecNoNA, aes(LV2012_Fiscal, colour = RevisionYMFactor)) + geom_density() + facet_grid(.~DiEiec) + theme_bw()
+
+ggplot(MainDiEiecNoNA, aes(RevisionYMFactor, colour = DiEiec)) + geom_density() + theme_bw()
+
+
 ```
 
 
