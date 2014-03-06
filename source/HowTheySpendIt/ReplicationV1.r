@@ -26,11 +26,17 @@ cor.test(Main$LV2012_Fiscal, Main$Honohan2003_Fiscal)
 Main$HKOngoing[Main$HonohanCrisisOngoing == 0] <- 'Crisis Complete'
 Main$HKOngoing[Main$HonohanCrisisOngoing == 1] <- 'Crisis Ongoing'
 
-PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing, label = iso2c)) + 
+eLabels <- c('Low Comp.', 'High Comp.')
+Main$DiEiecL <- factor(Main$DiEiec, levels = c(0, 1), labels = eLabels)
+Main$DiEiecL <- relevel(Main$DiEiecL, ref = 'High Comp.')
+
+
+PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing, label = iso2c, shape = DiEiecL)) + 
   geom_jitter(position = position_jitter(width = .5, height = 0), size = 3) +
   geom_text(angle = 30, vjust = -1) +
   scale_x_continuous(limits = c(1975, 2000)) +
   scale_colour_manual(values = c('black', 'grey'), name = '') +
+  scale_shape(name = 'Electoral\nCompetitiveness') +
   geom_hline(aes(yintercept = 0), linetype = 'dotted') +
   xlab('') + ylab('Laeven & Valencia - Honohan & Klingebiel\n') +
   theme_bw(base_size = 15)
@@ -41,23 +47,27 @@ dev.off()
 
 
 #### Compare cost densities ####
-eLabels <- c('Low Comp.', 'High Comp.')
-Main$DiEiecL <- factor(Main$DiEiec, levels = c(0, 1), labels = eLabels)
-
 MainSub2000 <- subset(Main, year <= 2000)
+MainSub2_HK <- subset(MainSub2000, !is.na(Honohan2003_Fiscal))
 
 P1 <- ggplot(MainSub2000, aes(Honohan2003_Fiscal, colour = DiEiecL, linetype = DiEiecL)) + geom_density() + 
         scale_color_brewer(palette = 'Set1', name = 'Electoral\nCompetitiveness') +
         scale_linetype_discrete(name = 'Electoral\nCompetitiveness') +
-        ylab('Denisty\n') + xlab('Fiscal Costs (% GDP)') + ggtitle('Honohan & Klingebiel (2003)') +
+        ylab('Denisty\n') + xlab('') + ggtitle('Honohan & Klingebiel (2003)') +
         theme_bw()
 
-P2 <- ggplot(Main, aes(LV2012_Fiscal, colour = DiEiecL, linetype = DiEiecL)) + geom_density() + 
+P2 <- ggplot(MainSub2_HK, aes(LV2012_Fiscal, colour = DiEiecL, linetype = DiEiecL)) + geom_density() + 
         scale_color_brewer(palette = 'Set1', name = 'Electoral\nCompetitiveness') +
         scale_linetype_discrete(name = 'Electoral\nCompetitiveness') +
-        ylab('Denisty\n') + xlab('Fiscal Costs (% GDP)') + ggtitle('Laeven and Valencia (2012)') +
+        ylab('Denisty\n') + xlab('') + ggtitle('Laeven and Valencia (2012) in Honohan & Klingebiel') +
+        theme_bw()
+
+P3 <- ggplot(Main, aes(LV2012_Fiscal, colour = DiEiecL, linetype = DiEiecL)) + geom_density() + 
+        scale_color_brewer(palette = 'Set1', name = 'Electoral\nCompetitiveness') +
+        scale_linetype_discrete(name = 'Electoral\nCompetitiveness') +
+        ylab('Denisty\n') + xlab('Fiscal Costs (% GDP)') + ggtitle('Laeven and Valencia (2012) before 2001') +
         theme_bw()
 
 pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/LV_HK_CompareElect.pdf', width = 10)
-  grid.arrange(P1, P2)
+  grid.arrange(P1, P2, P3)
 dev.off()
