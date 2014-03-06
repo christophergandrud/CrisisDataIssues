@@ -7,6 +7,7 @@
 library(countrycode)
 library(DataCombine)
 library(plyr)
+library(psData)
 library(ggplot2)
 
 # Load Eurostat financial crisis costs summary
@@ -25,8 +26,18 @@ GDP$country[GDP$country == 'GB'] <- 'UK'
 GDP <- GDP[, c('country', 'TIME', 'gdp')]
 names(GDP) <- c('country', 'year', 'gdp')
 
+# Years left in current term
+YearsLeft <- DpiGet(vars = c('yrcurnt', 'stabns'))
+YearsLeft$iso2c[YearsLeft$iso2c == 'GB'] <- 'UK'
+YearsLeft <- YearsLeft[, -2]
+names(YearsLeft) <- c('country', 'year', 'yrcurnt', 'stanbs')
+YearsLeft$DiElection[YearsLeft$yrcurnt == 0] <- "Election Year"
+YearsLeft$DiElection[YearsLeft$yrcurnt > 0] <- "Not Election Year"
+
 # Merge
 Comb <- dMerge(EUCosts, GDP, Var = c('country', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
+
 
 # Create X/GDP
 xgdp <- function(data, vars){
@@ -45,6 +56,15 @@ Comb <- ddply(Comb, .(country), mutate, CumSumNetCosts = cumsum(NetCost))
 
 # Create 'bagehot' index Assets/Contingent Liabilities
 Comb$Bagehot <-  (Comb$GovAssets/Comb$ContingentLiabilities)
+Comb$Bagehot[Comb$Bagehot == Inf] <- NA
+
+Comb$Cont_to_Liabilities <-  (Comb$ContingentLiabilities/Comb$GovLiabilities)
+Comb$Cont_to_Liabilities[Comb$Cont_to_Liabilities == Inf] <- NA
+
+
+# Log Bagehot
+Comb$LogBagehot <- log(Comb$Bagehot + (min(Comb$Bagehot, na.rm = TRUE) + 0.1))
+
 
 #### Plot ####
 # Net costs/gdp
@@ -58,7 +78,41 @@ ggplot(Comb, aes(t, CumSumNetCosts)) + geom_line() +
 
 # Bagehot index
 ggplot(Comb, aes(t, Bagehot)) + geom_line() + 
-  geom_hline(aes(yintercept = 0), linetype = 'dotted') +
+  geom_hline(aes(yintercept = 1), linetype = 'dotted') +
   ylab('Bagehot Index\n') + xlab('\nYears from first year of Gov. Response') +
   facet_grid(. ~ country) + theme_bw()
 
+CombSubE <- DropNA(Comb, 'DiElection')
+ggplot(CombSubE, aes(DiElection, LogBagehot, label = country)) + geom_boxplot() + geom_text() +
+  geom_hline(aes(yintercept = 0), linetype = 'dotted') +
+  xlab('') + ylab('Log Bagehot Index\n') + theme_bw()
+
+ggplot(Comb, aes(yrcurnt, LogBagehot)) + geom_point() + facet_grid(. ~ country) +
+  geom_hline(aes(yintercept = 0), linetype = 'dotted') +
+  stat_smooth(method = 'lm', se = FALSE) + 
+  scale_x_reverse() + xlab('\nYears to Election') +
+  theme_bw()
+
+ggplot(Comb, aes(yrcurnt, ContingentLiabilities)) + geom_jitter() + facet_grid(. ~ country) +
+  stat_smooth(method = 'lm', se = FALSE) + 
+  scale_x_reverse() + xlab('\nYears to Election') +
+  theme_bw()
+
+ggplot(Comb, aes(yrcurnt, GovLiabilities)) + geom_jitter() + facet_grid(. ~ country) +
+  stat_smooth(method = 'lm', se = FALSE) + 
+  scale_x_reverse() + xlab('\nYears to Election') +
+  theme_bw()
+
+ggplot(Comb, aes(yrcurnt, GovAssets)) + geom_jitter() + facet_grid(. ~ country) +
+  stat_smooth(method = 'lm', se = FALSE) + 
+  scale_x_reverse() + xlab('\nYears to Election') +
+  theme_bw()
+
+ggplot(Comb, aes(yrcurnt, NetCostPerGdp, colour = stanbs)) + geom_point() + facet_grid(. ~ country) +
+  geom_hline(aes(yintercept = 0), linetype = 'dotted') +
+  stat_smooth(method = 'lm', se = FALSE) + 
+  scale_x_reverse() + xlab('\nYears to Election') +
+  theme_bw()
+
+
+  
