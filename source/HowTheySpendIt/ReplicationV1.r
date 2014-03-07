@@ -12,6 +12,9 @@ library(foreign)
 library(reshape2)
 library(ggplot2)
 library(gridExtra)
+library(DataCombine)
+library(psData)
+library(countrycode)
 
 
 #### Compare fiscal costs in LV vs. HK ####
@@ -73,7 +76,7 @@ P3 <- ggplot(Main, aes(LV2012_Fiscal, colour = DiEiecL, linetype = DiEiecL)) + g
         #scale_color_brewer(palette = 'Set1', name = 'Electoral\nCompetitiveness') +
         scale_linetype_discrete(guide = FALSE) +
         #scale_linetype_discrete(name = 'Electoral\nCompetitiveness') +
-        ylab('') + xlab('Fiscal Costs (% GDP)') + ggtitle('All Laeven and Valencia (2012) before 2001') +
+        ylab('') + xlab('Fiscal Costs (% GDP)') + ggtitle('Laeven and Valencia (2012) before 2001') +
         theme_bw()
 
 # Combine
@@ -88,4 +91,100 @@ gP3$widths[2:5] <- as.list(maxWidth)
 
 pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/LV_HK_CompareElect.pdf', width = 10)
   grid.arrange(arrangeGrob(gP1, gP2, gP3, ncol = 1, heights = c(3, 3, 3)))
+dev.off()
+
+
+#### Eurostat ####
+
+# Eurostat data was gathered from: http://epp.eurostat.ec.europa.eu/portal/page/portal/ government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil. Accessed March 2014.
+# The data was hand entered into a .csv file located at: https://github.com/christophergandrud/CrisisDataIssues/blob/master/data/Eurostat_CrisisCosts.csv
+
+# Load data and clean
+EUCosts <- read.csv('/git_repositories/CrisisDataIssues/data/Eurostat_CrisisCosts.csv', stringsAsFactors = FALSE)
+
+names(EUCosts) <- c("country", "year", "t", "NetCost", "GovAssets", 
+                    "GovLiabilities", "ContingentLiabilities")
+
+# Load Eurostat GDP data
+GDP <- read.csv('/git_repositories/CrisisDataIssues/data/other/nama_gdp_c_1_Data.csv', stringsAsFactors = FALSE)
+
+GDP <- GDP[, c(2, 1, 5)]
+GDP$Value <- gsub(',', '', GDP$Value)
+GDP$gdp <- as.numeric(GDP$Value)
+GDP$country <- countrycode(GDP$GEO, origin = 'country.name', destination = 'iso2c')
+GDP$country[GDP$country == 'GB'] <- 'UK'
+GDP <- GDP[, c('country', 'TIME', 'gdp')]
+names(GDP) <- c('country', 'year', 'gdp')
+
+# Years left in current term
+YearsLeft <- DpiGet(vars = c('yrcurnt', 'stabns'))
+YearsLeft$iso2c[YearsLeft$iso2c == 'GB'] <- 'UK'
+YearsLeft <- YearsLeft[, -2]
+names(YearsLeft) <- c('country', 'year', 'yrcurnt', 'stanbs')
+YearsLeft$DiElection[YearsLeft$yrcurnt == 0] <- "Election Year"
+YearsLeft$DiElection[YearsLeft$yrcurnt > 0] <- "Not Election Year"
+
+# Merge
+Comb <- dMerge(EUCosts, GDP, Var = c('country', 'year'), all.x = TRUE)
+Comb <- dMerge(Comb, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
+
+
+# Create X/GDP
+xgdp <- function(data, vars){
+  for (i in vars){
+    data[, paste0(i, 'PerGdp')] <- (data[, i]/data[, 'gdp']) * 100
+  }
+  return(data)
+}
+VarNames <- c("NetCost", "GovAssets", "GovLiabilities", "ContingentLiabilities")
+Comb <- xgdp(data = Comb, vars = VarNames)
+Comb <- DropNA(Comb, 't')
+
+# Remove Finland (only has one observation year)
+Comb <- subset(Comb, country != 'FI')
+
+## Plots ###
+
+# Net costs
+NetCosts <- ggplot(Comb, aes(t, NetCostPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+              stat_smooth(method = 'lm', se = FALSE) + 
+              scale_x_reverse(breaks = c(4, 0)) + 
+              ylab('Net Costs (% GDP)\n') + xlab('\nYears from the Crisis Start') +
+              theme_bw()
+
+# Contingent liabilities without Ireland
+CombSub <- subset(Comb, country != 'IE')
+CombSub <- subset(CombSub, country != 'FI')
+CLPlot1 <- ggplot(CombSub, aes(yrcurnt, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+              stat_smooth(method = 'lm', se = FALSE) + 
+              scale_x_reverse(breaks = c(4, 0)) + 
+              ylab('Contingent Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+              theme_bw()
+
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/CL1_Plot.pdf', width = 10)
+  CLPlot1
+dev.off()
+
+# Contingent liabilities for Ireland
+CombSubIE <- subset(Comb, country == 'IE')
+CLPlot2 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+              stat_smooth(method = 'lm', se = FALSE) + 
+              scale_x_reverse(breaks = c(4, 0)) + 
+              ylab('Contingent Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+              theme_bw()
+
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/CL2_Plot.pdf', width = 2)
+  CLPlot2
+dev.off()
+
+
+# Liabilities
+LiaPLot <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+              stat_smooth(method = 'lm', se = FALSE) + 
+              scale_x_reverse(breaks = c(4, 0)) + 
+              ylab('Realized Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+              theme_bw()
+
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/Liabilities.pdf', width = 10)
+  LiaPLot
 dev.off()
