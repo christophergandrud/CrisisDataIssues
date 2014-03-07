@@ -116,13 +116,8 @@ GDP$country[GDP$country == 'GB'] <- 'UK'
 GDP <- GDP[, c('country', 'TIME', 'gdp')]
 names(GDP) <- c('country', 'year', 'gdp')
 
-# Years left in current term
-YearsLeft <- DpiGet(vars = c('yrcurnt', 'stabns'))
-YearsLeft$iso2c[YearsLeft$iso2c == 'GB'] <- 'UK'
-YearsLeft <- YearsLeft[, -2]
-names(YearsLeft) <- c('country', 'year', 'yrcurnt', 'stanbs')
-YearsLeft$DiElection[YearsLeft$yrcurnt == 0] <- "Election Year"
-YearsLeft$DiElection[YearsLeft$yrcurnt > 0] <- "Not Election Year"
+# Load modified election timing variable
+YearsLeft <- read.csv('/git_repositories/CrisisDataIssues/data/Elections.csv', stringsAsFactors = FALSE)
 
 # Merge
 Comb <- dMerge(EUCosts, GDP, Var = c('country', 'year'), all.x = TRUE)
