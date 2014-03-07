@@ -153,38 +153,62 @@ NetCosts <- ggplot(Comb, aes(t, NetCostPerGdp)) + geom_jitter() + facet_grid(. ~
               theme_bw()
 
 # Contingent liabilities without Ireland
-CombSub <- subset(Comb, country != 'IE')
-CombSub <- subset(CombSub, country != 'FI')
-CLPlot1 <- ggplot(CombSub, aes(yrcurnt, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+CombSubNoIE <- subset(Comb, country != 'IE')
+
+CLPlot1 <- ggplot(CombSubNoIE, aes(t, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+            stat_smooth(method = 'lm', se = FALSE) + 
+            scale_x_continuous(breaks = c(1, 5)) + 
+            geom_hline(yintercept = 0, linetype = 'dotted') +
+            ylab('Contingent Liabilities (% GDP)\n') + xlab('\nTime in Years from the Crisis Start') +
+            ggtitle('Ordered Chronologically') +
+            theme_bw()
+
+CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
               stat_smooth(method = 'lm', se = FALSE) + 
               scale_x_reverse(breaks = c(4, 0)) + 
+              geom_hline(yintercept = 0, linetype = 'dotted') +
               ylab('Contingent Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+              ggtitle('Ordered by Time to Election') +
               theme_bw()
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/CL1_Plot.pdf', width = 10)
-  CLPlot1
-dev.off()
+
 
 # Contingent liabilities for Ireland
 CombSubIE <- subset(Comb, country == 'IE')
-CLPlot2 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+CLPlot2 <- ggplot(CombSubIE, aes(t, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
               stat_smooth(method = 'lm', se = FALSE) + 
-              scale_x_reverse(breaks = c(4, 0)) + 
-              ylab('Contingent Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+              scale_x_continuous(breaks = c(1, 5)) + 
+              ylab('') + xlab('\n') + ggtitle('') +
               theme_bw()
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/CL2_Plot.pdf', width = 2)
-  CLPlot2
+CLPlot4 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+              stat_smooth(method = 'lm', se = FALSE) + 
+              scale_x_reverse(breaks = c(4, 1)) + ggtitle('') +
+              ylab('') + xlab('\n') +
+              theme_bw()
+
+pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/CL_Plot.pdf', width = 10)
+  grid.arrange(CLPlot1, CLPlot2, CLPlot3, CLPlot4, nrow = 2, widths = c(7, 1))
 dev.off()
 
 
 # Liabilities
-LiaPLot <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+LiaPLot1 <- ggplot(Comb, aes(t, GovLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
+              stat_smooth(method = 'lm', se = FALSE) + 
+              scale_x_continuous(breaks = c(1, 5)) + 
+              geom_hline(yintercept = 0, linetype = 'dotted') +
+              ylab('Realized Liabilities (% GDP)\n') + xlab('\nTime in Years from the Crisis Start') +
+              ggtitle('Ordered Chronologically') +
+              theme_bw()
+
+LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp)) + geom_jitter() + facet_grid(. ~ country) +
               stat_smooth(method = 'lm', se = FALSE) + 
               scale_x_reverse(breaks = c(4, 0)) + 
+              geom_hline(yintercept = 0, linetype = 'dotted') +
               ylab('Realized Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+              ggtitle('Ordered by Time to Election') +
               theme_bw()
 
 pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/Liabilities.pdf', width = 10)
-  LiaPLot
+  grid.arrange(LiaPLot1, LiaPLot2)
 dev.off()
