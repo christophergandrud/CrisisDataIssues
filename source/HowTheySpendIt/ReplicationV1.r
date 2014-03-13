@@ -211,7 +211,7 @@ pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/Liabi
 dev.off()
 
 # -------------------------------------------------------------------- #
-#### Test Independence for data in previous graphs ####
+#### Test Independence for Eurostat Trends/Elections data shown in previous graphs ####
 # First row is Increase
 # Second row is Flat or Down
 
