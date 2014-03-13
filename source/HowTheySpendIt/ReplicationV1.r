@@ -17,6 +17,7 @@ library(psData)
 library(countrycode)
 
 
+# -------------------------------------------------------------------- #
 #### Compare fiscal costs in LV vs. HK ####
 ## Data set created using:
 ## https://github.com/christophergandrud/CrisisDataIssues/blob/master/source/DataCreators/KeeferDataExtender.R
@@ -50,6 +51,7 @@ pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/Fisca
 dev.off()
 
 
+# -------------------------------------------------------------------- #
 #### Compare cost densities ####
 MainSub2000 <- subset(Main, year <= 2000)
 MainSub2_HK <- subset(MainSub2000, !is.na(Honohan2003_Fiscal))
@@ -94,6 +96,7 @@ pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/LV_HK
 dev.off()
 
 
+# -------------------------------------------------------------------- #
 #### Eurostat ####
 
 # Eurostat data was gathered from: http://epp.eurostat.ec.europa.eu/portal/page/portal/ government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil. Accessed March 2014.
@@ -122,7 +125,6 @@ YearsLeft <- read.csv('/git_repositories/CrisisDataIssues/data/Elections.csv', s
 # Merge
 Comb <- dMerge(EUCosts, GDP, Var = c('country', 'year'), all.x = TRUE)
 Comb <- dMerge(Comb, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
-
 
 # Create X/GDP
 xgdp <- function(data, vars){
@@ -207,3 +209,21 @@ LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp)) + geom_jitter() + f
 pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/Liabilities.pdf', width = 10)
   grid.arrange(LiaPLot1, LiaPLot2)
 dev.off()
+
+# -------------------------------------------------------------------- #
+#### Test Independence for data in previous graphs ####
+# First row is Increase
+# Second row is Flat or Down
+
+##### Contingent Liabilities ####
+NoElection = c(6, 13)
+Election = c(13, 6)
+
+chisq.test(data.frame(NoElection, Election), correct = F)
+
+
+#### Realized Liabilities ####
+NoElection = c(10, 9)
+Election = c(5, 14)
+
+chisq.test(data.frame(NoElection, Election), correct = F)

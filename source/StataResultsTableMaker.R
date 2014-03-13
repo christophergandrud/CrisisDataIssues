@@ -17,6 +17,9 @@ LVNoOnFull <- read.dta('LVNoOn.dta')
 LVFull <- read.dta('LVFullBasic.dta')
 KeefLog <- read.dta('KeeferLog.dta')
 LVLog <- read.dta('LVFullLogged.dta')
+LVLogPre2001 <- read.dta('LVPre2001KeeferSampleLog.dta')
+
+#### Full Table ####
 
 Comb <- merge(KeefOrig, Hono, by = 'var', all = TRUE, sort = FALSE)
 Comb <- merge(Comb, LVKeefer, by = 'var', all = TRUE, sort = FALSE)
@@ -48,5 +51,40 @@ Comb[, Temp][is.na(Comb[, Temp])] <- ""
 
 names(Comb) <- c('', 'Keefer', 'HK', 'LV-Keefer', 'LV pre-2001', 'LV Full', 'LV Full', 'Keefer Log', 'LV Full Log')
 
-print(xtable(Comb, dcolumn = TRUE, booktabs = TRUE), size = 'scriptsize', include.rownames = FALSE, floating = FALSE,
+print(xtable(Comb, dcolumn = TRUE, booktabs = TRUE), size = 'scriptsize', 
+      include.rownames = FALSE, floating = FALSE,
       file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables/KeeferRepTable.tex')
+
+#### Limited Table ####
+
+Comb <- merge(KeefOrig, Hono, by = 'var', all = TRUE, sort = FALSE)
+Comb <- merge(Comb, LVKeefer, by = 'var', all = TRUE, sort = FALSE)
+Comb <- merge(Comb, LVSub, by = 'var', all = TRUE, sort = FALSE)
+Comb <- merge(Comb, KeefLog, by = 'var', all = TRUE, sort = FALSE)
+Comb <- merge(Comb, LVLogPre2001, by = 'var', all = TRUE, sort = FALSE)
+
+# Clean up
+Comb <- data.frame(Comb[c(1:11), ])
+
+Comb$var <- gsub(pattern = "^.*?_stderr", replacement = "", Comb$var)
+Comb$var <- gsub(pattern = "_coef", replacement = "", Comb$var)
+
+Comb$var <- gsub(pattern = "_cons", replacement = "Constant", Comb$var)
+Comb$var <- gsub(pattern = "_con", replacement = "", Comb$var)
+
+Comb$var <- gsub(pattern = "Checks33", replacement = "Checks_Residual_33", Comb$var)
+Comb$var <- gsub(pattern = "DiEiec33", replacement = "Electoral Comp._33", Comb$var)
+Comb$var <- gsub(pattern = "stabnsLag3", replacement = "Instability_AVG_LAG3", Comb$var)
+
+Comb$var <- gsub(pattern = "r2", replacement = "R2", Comb$var)
+Comb$var <- gsub(pattern = "N_clust", replacement = "No. of Clusters", Comb$var)
+
+Temp <- c("KeeferOriginal", 'Honohan', "LVPre2001Keef.x", "LVPre2001", "KeeferLog", "LVPre2001Keef.y")
+Comb[, Temp][is.na(Comb[, Temp])] <- ""
+
+names(Comb) <- c('', 'Keefer', 'HK', 'LV-Keefer', 'LV pre-2001', 'Keefer Log', 'LV pre-2001 Log')
+
+print(xtable(Comb, dcolumn = TRUE, booktabs = TRUE), size = 'scriptsize', 
+      include.rownames = FALSE, floating = FALSE,
+      file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/tables/KeeferRepTable.tex')
+
