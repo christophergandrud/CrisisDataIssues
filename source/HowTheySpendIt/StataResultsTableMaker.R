@@ -1,7 +1,7 @@
 ###############
 # Create Keefer Replication Results Table
 # Christopher Gandrud
-# 10 February 2014
+# 14 March 2014
 ###############
 
 library(foreign)
@@ -55,7 +55,8 @@ print(xtable(Comb, dcolumn = TRUE, booktabs = TRUE), size = 'scriptsize',
       include.rownames = FALSE, floating = FALSE,
       file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables/KeeferRepTable.tex')
 
-#### Limited Table ####
+# ------------------------------------------------------- #
+#### Limited Table for How You Spend It Version ####
 
 Comb <- merge(KeefOrig, Hono, by = 'var', all = TRUE, sort = FALSE)
 Comb <- merge(Comb, LVKeefer, by = 'var', all = TRUE, sort = FALSE)

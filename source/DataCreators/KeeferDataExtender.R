@@ -1,7 +1,7 @@
 ################
 # Keefer (2007) data extender
 # Christopher Gandrud
-# 27 February 2014
+# 14 March 2014
 ###############
 
 # Load packages
@@ -248,18 +248,14 @@ CombRevis$Revision[(CombRevis$Miss_LV2012.Fiscal %in% 0 & CombRevis$Miss_Caprio1
 CombRevis$Revision[CombRevis$iso2c %in% 'PH' & CombRevis$year %in% 1983] <- 0
 
 # Merge years assuming that LV (2012) has correct start year
-source('/git_repositories/CrisisDataIssues/source/RevisedRevision.R')
+source('/git_repositories/CrisisDataIssues/source/DataCreators/RevisedRevision.R')
 
 # Save to Stata format
 write.dta(CombRevis, file = '/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
 
 
-
-
-
-
-
-##### Create Reinhart and Rogoff (2010) combination #####
+# -------------------------------------------------------------- #
+##### Create Reinhart and Rogoff (2010) combination (Not Used in How They Spend It Version) #####
 
 ## Download RR crisis data
 RR <- RRCrisisGet()
@@ -278,7 +274,8 @@ rr <- slide(rr, Var = 'RR_BankingCrisis', GroupVar = 'country', slideBy = 1)
 CombRR <- dMerge(rr, Fiscal, Var = c('iso2c', 'year'), all.x = TRUE)
 CombRR <- dMerge(CombRR, PolityData, Var = c('iso2c', 'year'), all.x = TRUE)
 
-write.csv(CombRR, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffFiscalPolity.csv', row.names = FALSE)
+write.csv(CombRR, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffFiscalPolity.csv', 
+          row.names = FALSE)
 
 #### Reinhart and Rogoff/Laeven and Valencia Start and Stop
 
@@ -302,5 +299,5 @@ LVNew <- LVNew[, c('iso2c', 'year', 'LV_SystemCrisis')]
 
 CombRRLV <- dMerge(rr, LVNew, Var = c('iso2c', 'year'), all = TRUE)
 
-write.csv(CombRRLV, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffLVCount.csv', row.names = FALSE)
-
+write.csv(CombRRLV, file = '/git_repositories/CrisisDataIssues/data/ReinhartRogoffLVCount.csv', 
+          row.names = FALSE)

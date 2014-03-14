@@ -1,7 +1,7 @@
 #####################
 # Country sample table creator
 # Christopher Gandrud
-# 13 February 2014
+# 14 March 2014
 #####################
 
 # Load data
@@ -29,4 +29,4 @@ print(xtable(KeeferFiscalTable,
              label = 'DVTable',
              digits = c(0, 0, 0, 1, 2, 1)), 
       size = 'tiny', include.rownames = FALSE, caption.placement = 'top', 
-      file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables/CountryLists.tex')
+      file = '~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/tables/CountryLists.tex')
