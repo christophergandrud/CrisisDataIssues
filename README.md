@@ -1,9 +1,9 @@
-CrisisDataIssues
+Crisis Data Issues
 ================
 
 ### Christopher Gandrud and Mark Hallerberg
 
-March 2014
+April 2014
 
 ---
 
