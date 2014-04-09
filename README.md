@@ -1,13 +1,11 @@
-CrisisDataIssues
+Crisis Data Issues
 ================
+
+> Reassessing data used in the study of political institutions and financial crises.
 
 ### Christopher Gandrud and Mark Hallerberg
 
-March 2014
-
----
-
-Reassessing data used in the study of political institutions and financial crises.
+*April 2014*
 
 We currently have two working papers that rely on the source code and data sets included in this repository. 
 
