@@ -1,7 +1,7 @@
 ///////////////
-// Update basic Keefer (2007)
+// Update Keefer (2007)
 // Christopher Gandrud
-// 10 March 2014
+// 16 April 2014
 // Using Stata 12
 ///////////////
 
