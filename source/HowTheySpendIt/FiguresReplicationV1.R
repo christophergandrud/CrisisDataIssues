@@ -5,7 +5,11 @@
 ###########
 
 # Set working directory
-setwd('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/')
+WD <- '~/Dropbox/AMCProject/CrisisDataIssuesPaper Keefer/figures/'
+setwd(WD)
+
+# Set data directory 
+DD <- '/git_repositories/CrisisDataIssues/data/'
 
 # Load packages
 library(foreign)
@@ -22,7 +26,7 @@ library(countrycode)
 ## Data set created using:
 ## https://github.com/christophergandrud/CrisisDataIssues/blob/master/source/DataCreators/KeeferDataExtender.R
 
-Main <- read.dta('/git_repositories/CrisisDataIssues/data/KeeferExtended.dta')
+Main <- read.dta(paste0(DD, 'KeeferExtended.dta'))
 
 Main$Diff <- Main$LV2012_Fiscal - Main$Honohan2003_Fiscal
 cor.test(Main$LV2012_Fiscal, Main$Honohan2003_Fiscal)
@@ -47,7 +51,7 @@ PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing, label = iso2c,
     xlab('') + ylab('Laeven & Valencia - Honohan & Klingebiel\n') +
     theme_bw(base_size = 15)
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/FiscalDifference.pdf', width = 10)
+pdf('FiscalDifference.pdf', width = 10)
     PlotDiff
 dev.off()
 
@@ -96,8 +100,7 @@ gP1$widths[2:5] <- as.list(maxWidth)
 gP2$widths[2:5] <- as.list(maxWidth)
 gP3$widths[2:5] <- as.list(maxWidth)
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/LV_HK_CompareElect.pdf',
-    width = 10)
+pdf('LV_HK_CompareElect.pdf', width = 10)
         grid.arrange(arrangeGrob(gP1, gP2, gP3, ncol = 1, heights = c(3, 3, 3)))
 dev.off()
 
@@ -109,13 +112,14 @@ dev.off()
 # The data was hand entered into a .csv file located at: https://github.com/christophergandrud/CrisisDataIssues/blob/master/data/Eurostat_CrisisCosts.csv
 
 # Load data and clean
-EUCosts <- read.csv('/git_repositories/CrisisDataIssues/data/Eurostat_CrisisCosts.csv', stringsAsFactors = FALSE)
+EUCosts <- read.csv(paste0(DD, 'Eurostat_CrisisCosts.csv'), 
+                    stringsAsFactors = FALSE)
 
 names(EUCosts) <- c("country", "year", "t", "NetCost", "GovAssets",
                     "GovLiabilities", "ContingentLiabilities")
 
 # Load Eurostat GDP data
-GDP <- read.csv('/git_repositories/CrisisDataIssues/data/other/nama_gdp_c_1_Data.csv',
+GDP <- read.csv(paste0(DD, 'other/nama_gdp_c_1_Data.csv'),
                 stringsAsFactors = FALSE)
 
 GDP <- GDP[, c(2, 1, 5)]
@@ -124,12 +128,22 @@ GDP$gdp <- as.numeric(GDP$Value)
 GDP$country <- countrycode(GDP$GEO, origin = 'country.name',
                             destination = 'iso2c')
 GDP$country[GDP$country == 'GB'] <- 'UK'
+GDP <- GDP[!(GDP$country %in% c('RE', NA)), ]
 GDP <- GDP[, c('country', 'TIME', 'gdp')]
-names(GDP) <- c('country', 'year', 'gdp')
+names(GDP) <- c('country', 'year', 'gdp_variable')
+
+# Create constant 2008 GDP
+g2008 <- subset(GDP, year == '2008')
+g2008 <- VarDrop(g2008, 'year')
+names(g2008) <- c('country', 'gdp_2008')
+
+GDP <- merge(GDP, g2008, by = 'country', all.x = TRUE)
 
 # Load modified election timing variable
-YearsLeft <- read.csv('/git_repositories/CrisisDataIssues/data/Elections.csv',
-                        stringsAsFactors = FALSE)
+## Created using:
+## https://github.com/christophergandrud/CrisisDataIssues/blob/master/source/DataCreators/YearsToElection.R
+
+YearsLeft <- read.csv(paste0(DD, 'Elections.csv'), stringsAsFactors = FALSE)
 
 # Merge
 Comb <- dMerge(EUCosts, GDP, Var = c('country', 'year'), all.x = TRUE)
@@ -138,7 +152,8 @@ Comb <- dMerge(Comb, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
 # Create X/GDP
 xgdp <- function(data, vars){
   for (i in vars){
-    data[, paste0(i, 'PerGdp')] <- (data[, i]/data[, 'gdp']) * 100
+    data[, paste0(i, 'PerGdp_variable')] <- (data[, i]/data[, 'gdp_variable']) * 100
+    data[, paste0(i, 'PerGdp_2008')] <- (data[, i]/data[, 'gdp_2008']) * 100
   }
   return(data)
 }
@@ -150,20 +165,10 @@ Comb <- DropNA(Comb, 't')
 Comb <- subset(Comb, country != 'FI')
 
 ## Plots ###
-
-# Net costs
-NetCosts <- ggplot(Comb, aes(t, NetCostPerGdp)) + geom_jitter() +
-                facet_grid(. ~ country) +
-                stat_smooth(method = 'lm', se = FALSE) +
-                scale_x_reverse(breaks = c(4, 0)) +
-                ylab('Net Costs (% GDP)\n') +
-                xlab('\nYears from the Crisis Start') +
-                theme_bw()
-
 # Contingent liabilities without Ireland
 CombSubNoIE <- subset(Comb, country != 'IE')
 
-CLPlot1 <- ggplot(CombSubNoIE, aes(t, ContingentLiabilitiesPerGdp)) +
+CLPlot1 <- ggplot(CombSubNoIE, aes(t, ContingentLiabilitiesPerGdp_2008)) +
             geom_jitter() + facet_grid(. ~ country) +
             stat_smooth(method = 'lm', se = FALSE) +
             scale_x_continuous(breaks = c(1, 5)) +
@@ -173,7 +178,7 @@ CLPlot1 <- ggplot(CombSubNoIE, aes(t, ContingentLiabilitiesPerGdp)) +
             ggtitle('Ordered Chronologically') +
             theme_bw()
 
-CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) +
+CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
                 geom_jitter() + facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_reverse(breaks = c(4, 0)) +
@@ -182,33 +187,30 @@ CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) +
                 ggtitle('Ordered by Time to Election') +
                 theme_bw()
 
-
-
 # Contingent liabilities for Ireland
 CombSubIE <- subset(Comb, country == 'IE')
-CLPlot2 <- ggplot(CombSubIE, aes(t, ContingentLiabilitiesPerGdp)) +
+CLPlot2 <- ggplot(CombSubIE, aes(t, ContingentLiabilitiesPerGdp_2008)) +
                 geom_jitter() + facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_continuous(breaks = c(1, 5)) +
                 ylab('') + xlab('\n') + ggtitle('') +
                 theme_bw()
 
-CLPlot4 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp)) +
+CLPlot4 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
                 geom_jitter() + facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_reverse(breaks = c(4, 1)) + ggtitle('') +
                 ylab('') + xlab('\n') +
                 theme_bw()
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/CL_Plot.pdf',
-    width = 10)
+pdf('CL_Plot.pdf', width = 10)
         grid.arrange(CLPlot1, CLPlot2, CLPlot3, CLPlot4, nrow = 2,
             widths = c(7, 1))
 dev.off()
 
 
 # Liabilities
-LiaPLot1 <- ggplot(Comb, aes(t, GovLiabilitiesPerGdp)) + geom_jitter() +
+LiaPLot1 <- ggplot(Comb, aes(t, GovLiabilitiesPerGdp_2008)) + geom_jitter() +
                 facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_continuous(breaks = c(1, 5)) +
@@ -218,17 +220,18 @@ LiaPLot1 <- ggplot(Comb, aes(t, GovLiabilitiesPerGdp)) + geom_jitter() +
                 ggtitle('Ordered Chronologically') +
                 theme_bw()
 
-LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp)) + geom_jitter() +
+LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp_2008)) + 
+                geom_jitter() +
                 facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_reverse(breaks = c(4, 0)) +
                 geom_hline(yintercept = 0, linetype = 'dotted') +
-                ylab('Realized Liabilities (% GDP)\n') + xlab('\nYears to Election') +
+                ylab('Realized Liabilities (% GDP)\n') + 
+                xlab('\nYears to Election') +
                 ggtitle('Ordered by Time to Election') +
                 theme_bw()
 
-pdf('~/Dropbox/AMCProject/CrisisDataIssuesPaper/HowYouSpendWriteUp/figures/Liabilities.pdf',
-    width = 10)
+pdf('Liabilities.pdf', width = 10)
         grid.arrange(LiaPLot1, LiaPLot2)
 dev.off()
 
