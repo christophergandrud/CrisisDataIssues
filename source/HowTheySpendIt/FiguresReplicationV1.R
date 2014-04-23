@@ -8,7 +8,7 @@
 WD <- '~/Dropbox/AMCProject/CrisisDataIssuesPaper Keefer/figures/'
 setwd(WD)
 
-# Set data directory 
+# Set data directory
 DD <- '/git_repositories/CrisisDataIssues/data/'
 
 # Load packages
@@ -19,7 +19,6 @@ library(gridExtra)
 library(DataCombine)
 library(psData)
 library(countrycode)
-
 
 # -------------------------------------------------------------------- #
 #### Compare fiscal costs in LV vs. HK ####
@@ -112,7 +111,7 @@ dev.off()
 # The data was hand entered into a .csv file located at: https://github.com/christophergandrud/CrisisDataIssues/blob/master/data/Eurostat_CrisisCosts.csv
 
 # Load data and clean
-EUCosts <- read.csv(paste0(DD, 'Eurostat_CrisisCosts.csv'), 
+EUCosts <- read.csv(paste0(DD, 'Eurostat_CrisisCosts.csv'),
                     stringsAsFactors = FALSE)
 
 names(EUCosts) <- c("country", "year", "t", "NetCost", "GovAssets",
@@ -220,13 +219,13 @@ LiaPLot1 <- ggplot(Comb, aes(t, GovLiabilitiesPerGdp_2008)) + geom_jitter() +
                 ggtitle('Ordered Chronologically') +
                 theme_bw()
 
-LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp_2008)) + 
+LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp_2008)) +
                 geom_jitter() +
                 facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_reverse(breaks = c(4, 0)) +
                 geom_hline(yintercept = 0, linetype = 'dotted') +
-                ylab('Realized Liabilities (% GDP)\n') + 
+                ylab('Realized Liabilities (% GDP)\n') +
                 xlab('\nYears to Election') +
                 ggtitle('Ordered by Time to Election') +
                 theme_bw()
