@@ -1,7 +1,7 @@
 #################
 # Eurostat crisis costs data explore (http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil)
 # Christopher Gandrud
-# 3 March 2014
+# 23 April 2014
 #################
 
 library(countrycode)
