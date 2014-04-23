@@ -246,9 +246,8 @@ Election = c(13, 6)
 
 chisq.test(data.frame(NoElection, Election), correct = F)
 
-
 #### Realized Liabilities ####
-NoElection = c(10, 9)
-Election = c(5, 14)
+NoElection = c(11, 8)
+Election = c(4, 15)
 
 chisq.test(data.frame(NoElection, Election), correct = F)
