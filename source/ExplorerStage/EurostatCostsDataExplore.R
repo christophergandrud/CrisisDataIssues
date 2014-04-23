@@ -1,5 +1,6 @@
 #################
-# Eurostat crisis costs data explore (http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil)
+# Eurostat crisis costs data explore 
+# (http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil)
 # Christopher Gandrud
 # 23 April 2014
 #################
@@ -11,12 +12,15 @@ library(psData)
 library(ggplot2)
 
 # Load Eurostat financial crisis costs summary
-EUCosts <- read.csv('/git_repositories/CrisisDataIssues/data/Eurostat_CrisisCosts.csv', stringsAsFactors = FALSE)
+EUCosts <- read.csv('/git_repositories/CrisisDataIssues/data/Eurostat_CrisisCosts.csv', 
+                    stringsAsFactors = FALSE)
 
-names(EUCosts) <- c("country", "year", "t", "NetCost", "GovAssets", "GovLiabilities", "ContingentLiabilities")
+names(EUCosts) <- c("country", "year", "t", "NetCost", "GovAssets", 
+                    "GovLiabilities", "ContingentLiabilities")
 
 # Load Eurostat GDP data
-GDP <- read.csv('/git_repositories/CrisisDataIssues/data/other/nama_gdp_c_1_Data.csv', stringsAsFactors = FALSE)
+GDP <- read.csv('/git_repositories/CrisisDataIssues/data/other/nama_gdp_c_1_Data.csv', 
+                stringsAsFactors = FALSE)
 
 GDP <- GDP[, c(2, 1, 5)]
 GDP$Value <- gsub(',', '', GDP$Value)
