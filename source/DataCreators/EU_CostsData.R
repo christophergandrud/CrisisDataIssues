@@ -65,3 +65,11 @@ for (i in 1:nrow(Comb)){
     }
 }
 
+# Creat chronological crisis counts
+Comb$time <- Comb$year - 2006
+Comb <- MoveFront(Comb, c('country', 'year', 'time'))
+
+# Save
+SaveDir <- '/git_repositories/CrisisDataIssues/data/'
+write.csv(Comb, file = paste0(SaveDir, 'Eurostat_CrisisCosts.csv'),
+          row.names = FALSE)
