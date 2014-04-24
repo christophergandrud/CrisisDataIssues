@@ -119,4 +119,4 @@ Comb$yrcurnt[Comb$country == 'UK' & Comb$year == 2013] <- 2
 
 # Save data
 SaveDir <- '/git_repositories/CrisisDataIssues/data/'
-write.csv(YearsLeft, paste0(SaveDir, 'Elections.csv'), row.names = FALSE)
+write.csv(Comb, file = paste0(SaveDir, 'Elections.csv'), row.names = FALSE)

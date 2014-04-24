@@ -107,8 +107,9 @@ dev.off()
 # -------------------------------------------------------------------- #
 #### Eurostat ####
 
-# Eurostat data was gathered from: http://epp.eurostat.ec.europa.eu/portal/page/portal/ government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil. Accessed March 2014.
-# The data was hand entered into a .csv file located at: https://github.com/christophergandrud/CrisisDataIssues/blob/master/data/Eurostat_CrisisCosts.csv
+# Eurostat data was gathered from: http://epp.eurostat.ec.europa.eu/portal/page/portal/ government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil. Accessed April 2014.
+# The data was transformed using into the current format using: 
+# https://github.com/christophergandrud/CrisisDataIssues/blob/master/source/DataCreators/EU_CostsData.R
 
 # Load data and clean
 EUCosts <- read.csv(paste0(DD, 'Eurostat_CrisisCosts.csv'),
@@ -155,7 +156,7 @@ xgdp <- function(data, vars){
 }
 VarNames <- c("NetCost", "GovAssets", "GovLiabilities", "ContingentLiabilities")
 Comb <- xgdp(data = Comb, vars = VarNames)
-#Comb <- DropNA(Comb, 'time')
+Comb <- DropNA(Comb, 'ContingentLiabilities')
 
 # Remove Finland (only has one observation year)
 Comb <- subset(Comb, country != 'FI')
