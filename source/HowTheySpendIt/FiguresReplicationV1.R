@@ -1,7 +1,7 @@
 ###########
 # Replication file for 'How they spend it'
 # Christopher Gandrud
-# 23 April 2014
+# 24 April 2014
 ###########
 
 # Set working directory
