@@ -114,9 +114,6 @@ dev.off()
 EUCosts <- read.csv(paste0(DD, 'Eurostat_CrisisCosts.csv'),
                     stringsAsFactors = FALSE)
 
-names(EUCosts) <- c("country", "year", "t", "NetCost", "GovAssets",
-                    "GovLiabilities", "ContingentLiabilities")
-
 # Load Eurostat GDP data
 GDP <- read.csv(paste0(DD, 'other/nama_gdp_c_1_Data.csv'),
                 stringsAsFactors = FALSE)
@@ -158,7 +155,7 @@ xgdp <- function(data, vars){
 }
 VarNames <- c("NetCost", "GovAssets", "GovLiabilities", "ContingentLiabilities")
 Comb <- xgdp(data = Comb, vars = VarNames)
-Comb <- DropNA(Comb, 't')
+#Comb <- DropNA(Comb, 'time')
 
 # Remove Finland (only has one observation year)
 Comb <- subset(Comb, country != 'FI')
@@ -167,13 +164,13 @@ Comb <- subset(Comb, country != 'FI')
 # Contingent liabilities without Ireland
 CombSubNoIE <- subset(Comb, country != 'IE')
 
-CLPlot1 <- ggplot(CombSubNoIE, aes(t, ContingentLiabilitiesPerGdp_2008)) +
+CLPlot1 <- ggplot(CombSubNoIE, aes(time, ContingentLiabilitiesPerGdp_2008)) +
             geom_jitter() + facet_grid(. ~ country) +
             stat_smooth(method = 'lm', se = FALSE) +
             scale_x_continuous(breaks = c(1, 5)) +
             geom_hline(yintercept = 0, linetype = 'dotted') +
             ylab('Contingent Liabilities (% GDP)\n') +
-            xlab('\nTime in Years from the Crisis Start') +
+            xlab('\nTime in Years from 2007') +
             ggtitle('Ordered Chronologically') +
             theme_bw()
 
@@ -188,7 +185,7 @@ CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
 
 # Contingent liabilities for Ireland
 CombSubIE <- subset(Comb, country == 'IE')
-CLPlot2 <- ggplot(CombSubIE, aes(t, ContingentLiabilitiesPerGdp_2008)) +
+CLPlot2 <- ggplot(CombSubIE, aes(time, ContingentLiabilitiesPerGdp_2008)) +
                 geom_jitter() + facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_continuous(breaks = c(1, 5)) +
@@ -209,7 +206,7 @@ dev.off()
 
 
 # Liabilities
-LiaPLot1 <- ggplot(Comb, aes(t, GovLiabilitiesPerGdp_2008)) + geom_jitter() +
+LiaPLot1 <- ggplot(Comb, aes(time, GovLiabilitiesPerGdp_2008)) + geom_jitter() +
                 facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_continuous(breaks = c(1, 5)) +
