@@ -26,10 +26,10 @@ Main <- read.xlsx(file = paste0(DataDir,
 
 #### Cleaning ####
 # Convert 0 to NA
-for (i in 2:29) Main[, i][Main[, i] == 0] <- NA
-
-# Clean up 
-for (i in 2:29) Main[, i] <- round(Main[, i], digits = 1)
+for (i in 2:29){
+    Main[, i][Main[, i] == 0] <- NA
+    Main[, i] <- round(Main[, i], digits = 1)
+}
 
 #### Extract seperate series ####
 SeriesExtractor <- function(data = Main, colIndex, newName){
@@ -54,3 +54,14 @@ b <- c('country', 'year')
 Comb <- merge(NC, GA, by = b)
 Comb <- merge(Comb, GL, by = b)
 Comb <- merge(Comb, CL, by = b)
+
+# Replace NA with 0 for years where at least one quantity is reported
+for (i in 1:nrow(Comb)){
+    test <- any(!is.na(Comb[i, 3:6]))
+    if (isTRUE(test)){
+        for (u in 3:6){
+            Comb[i, u][is.na(Comb[i, u])] <- 0
+        }
+    }
+}
+
