@@ -115,26 +115,6 @@ dev.off()
 EUCosts <- read.csv(paste0(DD, 'Eurostat_CrisisCosts.csv'),
                     stringsAsFactors = FALSE)
 
-# Load Eurostat GDP data
-GDP <- read.csv(paste0(DD, 'other/nama_gdp_c_1_Data.csv'),
-                stringsAsFactors = FALSE)
-
-GDP <- GDP[, c(2, 1, 5)]
-GDP$Value <- gsub(',', '', GDP$Value)
-GDP$gdp <- as.numeric(GDP$Value)
-GDP$country <- countrycode(GDP$GEO, origin = 'country.name',
-                            destination = 'iso2c')
-GDP$country[GDP$country == 'GB'] <- 'UK'
-GDP <- GDP[!(GDP$country %in% c('RE', NA)), ]
-GDP <- GDP[, c('country', 'TIME', 'gdp')]
-names(GDP) <- c('country', 'year', 'gdp_variable')
-
-# Create constant 2008 GDP
-g2008 <- subset(GDP, year == '2008')
-g2008 <- VarDrop(g2008, 'year')
-names(g2008) <- c('country', 'gdp_2008')
-
-GDP <- merge(GDP, g2008, by = 'country', all.x = TRUE)
 
 # Load modified election timing variable
 ## Created using:
@@ -142,20 +122,8 @@ GDP <- merge(GDP, g2008, by = 'country', all.x = TRUE)
 
 YearsLeft <- read.csv(paste0(DD, 'Elections.csv'), stringsAsFactors = FALSE)
 
-# Merge
-Comb <- dMerge(EUCosts, GDP, Var = c('country', 'year'), all.x = TRUE)
-Comb <- dMerge(Comb, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
+Comb <- dMerge(EUCosts, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
 
-# Create X/GDP
-xgdp <- function(data, vars){
-  for (i in vars){
-    data[, paste0(i, 'PerGdp_variable')] <- (data[, i]/data[, 'gdp_variable']) * 100
-    data[, paste0(i, 'PerGdp_2008')] <- (data[, i]/data[, 'gdp_2008']) * 100
-  }
-  return(data)
-}
-VarNames <- c("NetCost", "GovAssets", "GovLiabilities", "ContingentLiabilities")
-Comb <- xgdp(data = Comb, vars = VarNames)
 Comb <- DropNA(Comb, 'ContingentLiabilities')
 
 # Remove Finland (only has one observation year)
