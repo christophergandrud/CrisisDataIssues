@@ -132,7 +132,7 @@ Comb <- subset(Comb, country != 'FI')
 # Remove Slovakia (only has two years)
 Comb <- subset(Comb, country != 'SK')
 
-# Comb <- subset(Comb, year != 2013)
+Comb <- subset(Comb, year != 2013) ## 5 years from the start of the crisis
 
 ## Plots ###
 # Contingent liabilities without Ireland
