@@ -1,7 +1,7 @@
 ###########
 # Replication file for 'How they spend it'
 # Christopher Gandrud
-# 24 April 2014
+# 25 April 2014
 ###########
 
 # Set working directory
@@ -161,6 +161,11 @@ Comb <- DropNA(Comb, 'ContingentLiabilities')
 # Remove Finland (only has one observation year)
 Comb <- subset(Comb, country != 'FI')
 
+# Remove Slovakia (only has two years)
+Comb <- subset(Comb, country != 'SK')
+
+# Comb <- subset(Comb, year != 2013)
+
 ## Plots ###
 # Contingent liabilities without Ireland
 CombSubNoIE <- subset(Comb, country != 'IE')
@@ -240,6 +245,9 @@ dev.off()
 ##### Contingent Liabilities ####
 NoElection = c(6, 13)
 Election = c(13, 6)
+
+NoElection = c(5, 8, 7)
+Election = c(7, 4, 9)
 
 chisq.test(data.frame(NoElection, Election), correct = F)
 

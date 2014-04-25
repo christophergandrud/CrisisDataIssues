@@ -1,12 +1,15 @@
 ##############
 # Download and clean EU Financial Crisis costs data
 # Christopher Gandrud
-# 24 April 2014
+# 25 April 2014
 ##############
 
 # Load packages
 library(repmis)
 library(reshape2)
+
+# Set data directory
+DD <- '/git_repositories/CrisisDataIssues/data/'
 
 #### Download data ####
 sr <- 4 # start row
@@ -69,6 +72,11 @@ for (i in 1:nrow(Comb)){
 Comb$time <- Comb$year - 2006
 Comb <- MoveFront(Comb, c('country', 'year', 'time'))
 
+# --------------------------------------- #
+#### Create versions that are a % of GDP ####
+
+
+# --------------------------------------- #
 # Save
 SaveDir <- '/git_repositories/CrisisDataIssues/data/'
 write.csv(Comb, file = paste0(SaveDir, 'Eurostat_CrisisCosts.csv'),

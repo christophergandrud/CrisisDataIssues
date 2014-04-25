@@ -63,7 +63,7 @@ Comb$yrcurnt[Comb$country == 'FR' & Comb$year == 2013] <- 1
 Comb$yrcurnt[Comb$country == 'GR' & Comb$year == 2007] <- 0
 Comb$yrcurnt[Comb$country == 'GR' & Comb$year == 2009] <- 0
 Comb$yrcurnt[Comb$country == 'GR' & Comb$year == 2012] <- 0
-Comb$yrcurnt[Comb$country == 'GR' & Comb$year == 2013] <- 1
+Comb$yrcurnt[Comb$country == 'GR' & Comb$year == 2013] <- 3
 
 Comb$yrcurnt[Comb$country == 'HR' & Comb$year == 2013] <- 2
 
