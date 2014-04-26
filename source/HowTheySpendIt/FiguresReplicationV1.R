@@ -1,7 +1,7 @@
 ###########
 # Replication file for 'How they spend it'
 # Christopher Gandrud
-# 25 April 2014
+# 26 April 2014
 ###########
 
 # Set working directory
@@ -48,7 +48,7 @@ PlotDiff <- ggplot(Main, aes(year, Diff, colour = HKOngoing, label = iso2c,
     scale_shape(name = 'Electoral\nCompetitiveness') +
     geom_hline(aes(yintercept = 0), linetype = 'dotted') +
     xlab('') + ylab('Laeven & Valencia - Honohan & Klingebiel\n') +
-    theme_bw(base_size = 15)
+    theme_linedraw(base_size = 15)
 
 pdf('FiscalDifference.pdf', width = 10)
     PlotDiff
@@ -68,7 +68,7 @@ P1 <- ggplot(MainSub2000, aes(Honohan2003_Fiscal, colour = DiEiecL,
         scale_linetype_discrete(guide = FALSE) +
         #scale_linetype_discrete(name = 'Electoral\nCompetitiveness') +
         ylab('') + xlab('') + ggtitle('Honohan & Klingebiel (2003)') +
-        theme_bw()
+        theme_linedraw()
 
 P2 <- ggplot(MainSub2_HK, aes(LV2012_Fiscal, colour = DiEiecL,
         linetype = DiEiecL)) + geom_density(size = 1) +
@@ -78,7 +78,7 @@ P2 <- ggplot(MainSub2_HK, aes(LV2012_Fiscal, colour = DiEiecL,
         scale_linetype_discrete(name = 'Electoral\nCompetitiveness') +
         ylab('Denisty\n') + xlab('') +
         ggtitle('Laeven and Valencia (2012) in Honohan & Klingebiel (2003)') +
-        theme_bw()
+        theme_linedraw()
 
 P3 <- ggplot(Main, aes(LV2012_Fiscal, colour = DiEiecL, linetype = DiEiecL)) +
         geom_density(size = 1) +
@@ -87,7 +87,7 @@ P3 <- ggplot(Main, aes(LV2012_Fiscal, colour = DiEiecL, linetype = DiEiecL)) +
         scale_linetype_discrete(guide = FALSE) +
         ylab('') + xlab('Fiscal Costs (% GDP)') +
         ggtitle('Laeven and Valencia (2012) before 2001') +
-        theme_bw()
+        theme_linedraw()
 
 # Combine
 gP1 <- ggplotGrob(P1)
@@ -146,7 +146,7 @@ CLPlot1 <- ggplot(CombSubNoIE, aes(time, ContingentLiabilitiesPerGdp_2008)) +
             ylab('Contingent Liabilities (% GDP)\n') +
             xlab('\nTime in Years from 2007') +
             ggtitle('Ordered Chronologically') +
-            theme_bw()
+            theme_linedraw()
 
 CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
                 geom_jitter() + facet_grid(. ~ country) +
@@ -155,7 +155,7 @@ CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
                 geom_hline(yintercept = 0, linetype = 'dotted') +
                 ylab('Contingent Liabilities (% GDP)\n') + xlab('\nYears to Election') +
                 ggtitle('Ordered by Time to Election') +
-                theme_bw()
+                theme_linedraw()
 
 # Contingent liabilities for Ireland
 CombSubIE <- subset(Comb, country == 'IE')
@@ -164,14 +164,14 @@ CLPlot2 <- ggplot(CombSubIE, aes(time, ContingentLiabilitiesPerGdp_2008)) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_continuous(breaks = c(1, 5)) +
                 ylab('') + xlab('\n') + ggtitle('') +
-                theme_bw()
+                theme_linedraw()
 
 CLPlot4 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
                 geom_jitter() + facet_grid(. ~ country) +
                 stat_smooth(method = 'lm', se = FALSE) +
                 scale_x_reverse(breaks = c(4, 1)) + ggtitle('') +
                 ylab('') + xlab('\n') +
-                theme_bw()
+                theme_linedraw()
 
 pdf('CL_Plot.pdf', width = 10)
         grid.arrange(CLPlot1, CLPlot2, CLPlot3, CLPlot4, nrow = 2,
@@ -188,7 +188,7 @@ LiaPLot1 <- ggplot(Comb, aes(time, GovLiabilitiesPerGdp_2008)) + geom_jitter() +
                 ylab('Realized Liabilities (% GDP)\n') +
                 xlab('\nTime in Years from the Crisis Start') +
                 ggtitle('Ordered Chronologically') +
-                theme_bw()
+                theme_linedraw()
 
 LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp_2008)) +
                 geom_jitter() +
@@ -199,7 +199,7 @@ LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp_2008)) +
                 ylab('Realized Liabilities (% GDP)\n') +
                 xlab('\nYears to Election') +
                 ggtitle('Ordered by Time to Election') +
-                theme_bw()
+                theme_linedraw()
 
 pdf('Liabilities.pdf', width = 10)
         grid.arrange(LiaPLot1, LiaPLot2)
