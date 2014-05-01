@@ -1,7 +1,7 @@
 ###########
 # Replication file for 'How they spend it'
 # Christopher Gandrud
-# 26 April 2014
+# 1 May 2014
 ###########
 
 # Set working directory
@@ -126,6 +126,13 @@ Comb <- dMerge(EUCosts, YearsLeft, Var = c('country', 'year'), all.x = TRUE)
 
 Comb <- DropNA(Comb, 'ContingentLiabilities')
 
+Comb$CollapseElect <- Comb$yrcurnt
+Comb$CollapseElect[Comb$yrcurnt > 1] <- 3
+Comb$CollapseElect <- factor(Comb$CollapseElect, 
+                             labels = c('Election Year', 'Elect. - 1', 
+                                        'Other Years'))
+
+
 # Remove Finland (only has one observation year)
 Comb <- subset(Comb, country != 'FI')
 
@@ -133,94 +140,68 @@ Comb <- subset(Comb, country != 'FI')
 Comb <- subset(Comb, country != 'SK')
 
 Comb <- subset(Comb, year != 2013) ## 5 years from the start of the crisis
+Comb <- subset(Comb, year >= 2009) ## Only UK has data in 2007
+Comb <- subset(Comb, yrcurnt !=5) ## Only one observation
 
-## Plots ###
-# Contingent liabilities without Ireland
-CombSubNoIE <- subset(Comb, country != 'IE')
+# Find country standard deviations in liabilities
+SDMean <- function(var){
+    
+    Comb <- eval(parse(text = paste0('mutate(group_by(Comb, country), tempMean = mean(',
+                                     var,'))')))
+    Comb <- eval(parse(text = paste0('mutate(group_by(Comb, country), tempSD = sd(',
+                                     var,'))')))
+    
+    Comb$tempMSub <- Comb[, var] - Comb[, 'tempMean']
+    Comb[, paste0(var, '_Standard')] <- Comb$tempMSub/Comb$tempSD
+    Comb <- VarDrop(Comb, c('tempMean', 'tempSD', 'tempMSub'))
+    
+    return(Comb)
+}
 
-CLPlot1 <- ggplot(CombSubNoIE, aes(time, ContingentLiabilitiesPerGdp_2008)) +
-            geom_jitter() + facet_grid(. ~ country) +
-            stat_smooth(method = 'lm', se = FALSE) +
-            scale_x_continuous(breaks = c(1, 5)) +
-            geom_hline(yintercept = 0, linetype = 'dotted') +
-            ylab('Contingent Liabilities (% GDP)\n') +
-            xlab('\nTime in Years from 2007') +
-            ggtitle('Ordered Chronologically') +
-            theme_linedraw()
+Comb <- SDMean('ContingentLiabilities')
+Comb <- SDMean('GovLiabilities')
 
-CLPlot3 <- ggplot(CombSubNoIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
-                geom_jitter() + facet_grid(. ~ country) +
-                stat_smooth(method = 'lm', se = FALSE) +
-                scale_x_reverse(breaks = c(4, 0)) +
-                geom_hline(yintercept = 0, linetype = 'dotted') +
-                ylab('Contingent Liabilities (% GDP)\n') + xlab('\nYears to Election') +
-                ggtitle('Ordered by Time to Election') +
-                theme_linedraw()
+#### Contingent liability plots ####
+CLPlot1 <- ggplot(Comb, aes(ContingentLiabilities_Standard)) + 
+    geom_density(color = '#a6bddb', fill = '#a6bddb', alpha = 0.7) + 
+    facet_grid(CollapseElect ~ .) +
+    scale_y_continuous(breaks = c(0, 0.3)) +
+    geom_vline(xintercept = 0) +
+    xlab('') + ylab('Density\n') +
+    theme_bw(base_size = 12)
 
-# Contingent liabilities for Ireland
-CombSubIE <- subset(Comb, country == 'IE')
-CLPlot2 <- ggplot(CombSubIE, aes(time, ContingentLiabilitiesPerGdp_2008)) +
-                geom_jitter() + facet_grid(. ~ country) +
-                stat_smooth(method = 'lm', se = FALSE) +
-                scale_x_continuous(breaks = c(1, 5)) +
-                ylab('') + xlab('\n') + ggtitle('') +
-                theme_linedraw()
-
-CLPlot4 <- ggplot(CombSubIE, aes(yrcurnt, ContingentLiabilitiesPerGdp_2008)) +
-                geom_jitter() + facet_grid(. ~ country) +
-                stat_smooth(method = 'lm', se = FALSE) +
-                scale_x_reverse(breaks = c(4, 1)) + ggtitle('') +
-                ylab('') + xlab('\n') +
-                theme_linedraw()
+CLPlot2 <- ggplot(Comb, aes(ContingentLiabilities_Standard)) + 
+    geom_density(color = '#a6bddb', fill = '#a6bddb', alpha = 0.7) +
+    facet_grid(year ~ .) +
+    scale_y_continuous(breaks = c(0, 0.3)) +
+    geom_vline(xintercept = 0) +
+    xlab('\n Contingent liabilities (St. dev. from country mean)') +
+    ylab('Density\n') +
+    theme_bw(base_size = 12)
 
 pdf('CL_Plot.pdf', width = 10)
-        grid.arrange(CLPlot1, CLPlot2, CLPlot3, CLPlot4, nrow = 2,
-            widths = c(7, 1))
+    grid.arrange(CLPlot1, CLPlot2, nrow = 2)
 dev.off()
 
+#### Realized liability plots ####
+RLPlot1 <- ggplot(Comb, aes(GovLiabilities_Standard)) + 
+    geom_density(color = '#a6bddb', fill = '#a6bddb', alpha = 0.7) +
+    facet_grid(CollapseElect ~ .) +
+    scale_y_continuous(breaks = c(0, 0.3)) +
+    geom_vline(xintercept = 0) +
+    xlab('') +
+    ylab('Density\n') +
+    theme_bw(base_size = 12)
 
-# Liabilities
-LiaPLot1 <- ggplot(Comb, aes(time, GovLiabilitiesPerGdp_2008)) + geom_jitter() +
-                facet_grid(. ~ country) +
-                stat_smooth(method = 'lm', se = FALSE) +
-                scale_x_continuous(breaks = c(1, 5)) +
-                geom_hline(yintercept = 0, linetype = 'dotted') +
-                ylab('Realized Liabilities (% GDP)\n') +
-                xlab('\nTime in Years from the Crisis Start') +
-                ggtitle('Ordered Chronologically') +
-                theme_linedraw()
-
-LiaPLot2 <- ggplot(Comb, aes(yrcurnt, GovLiabilitiesPerGdp_2008)) +
-                geom_jitter() +
-                facet_grid(. ~ country) +
-                stat_smooth(method = 'lm', se = FALSE) +
-                scale_x_reverse(breaks = c(4, 0)) +
-                geom_hline(yintercept = 0, linetype = 'dotted') +
-                ylab('Realized Liabilities (% GDP)\n') +
-                xlab('\nYears to Election') +
-                ggtitle('Ordered by Time to Election') +
-                theme_linedraw()
+RLPlot2 <- ggplot(Comb, aes(GovLiabilities_Standard)) + 
+    geom_density(color = '#a6bddb', fill = '#a6bddb', alpha = 0.7) + 
+    facet_grid(year ~ .) +
+    scale_y_continuous(breaks = c(0, 0.3)) +
+    geom_vline(xintercept = 0) +
+    xlab('\n Realized liabilities (St. dev. from country mean)') +
+    ylab('Density\n') +
+    theme_bw(base_size = 12)
 
 pdf('Liabilities.pdf', width = 10)
-        grid.arrange(LiaPLot1, LiaPLot2)
+    grid.arrange(RLPlot1, RLPlot2, nrow = 2)
 dev.off()
-
-# -------------------------------------------------------------------- #
-#### Test Independence for Eurostat Trends/Elections data shown in previous graphs ####
-# First row is Increase
-# Second row is Flat or Down
-
-##### Contingent Liabilities ####
-NoElection = c(6, 13)
-Election = c(13, 6)
-
-NoElection = c(5, 8, 7)
-Election = c(7, 4, 9)
-
-chisq.test(data.frame(NoElection, Election), correct = F)
-
-#### Realized Liabilities ####
-NoElection = c(11, 8)
-Election = c(4, 15)
-
-chisq.test(data.frame(NoElection, Election), correct = F)
