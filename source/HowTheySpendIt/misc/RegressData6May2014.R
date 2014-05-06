@@ -13,6 +13,9 @@ library(foreign)
 # Set data directory
 DD <- '/git_repositories/CrisisDataIssues/data/'
 
+# Save directory
+SD <- '/git_repositories/CrisisDataIssues/data/misc/'
+
 #### Eurostat ####
 
 # Eurostat data was gathered from: http://epp.eurostat.ec.europa.eu/portal/page/portal/ government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil. Accessed April 2014.
@@ -77,3 +80,8 @@ Comb <- Comb[order(Comb$country, Comb$year), ]
 
 Comb <- slide(Comb, 'wdiNpl', GroupVar = 'country', slideBy = -1)
 Comb <- slide(Comb, 'wdiNpl', GroupVar = 'country', slideBy = -2)
+
+
+
+#### Save
+write.dta(Comb, file = paste0(SD, 'BaseEUData_6May2014.dta'))
