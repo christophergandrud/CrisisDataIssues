@@ -1,7 +1,7 @@
 ###########
 # Replication file for 'How they spend it'
 # Christopher Gandrud
-# 1 May 2014
+# 5 May 2014
 ###########
 
 # Set working directory
@@ -14,6 +14,7 @@ DD <- '/git_repositories/CrisisDataIssues/data/'
 # Load packages
 library(foreign)
 library(reshape2)
+library(dplyr)
 library(ggplot2)
 library(gridExtra)
 library(DataCombine)
