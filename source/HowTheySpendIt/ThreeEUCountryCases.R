@@ -93,6 +93,8 @@ value <- c(5942, 11411, 12059,
     
 Comb <- data.frame(type, year, value)
 
+# Plot
+
 pdf('~/Desktop/EuroReWrite/IrelandNumbersCompare.pdf', width = 10) ## Change later
 ggplot(Comb, aes(as.factor(year), value, group = type, linetype = type,
                  color = type)) +
@@ -100,6 +102,6 @@ ggplot(Comb, aes(as.factor(year), value, group = type, linetype = type,
     scale_color_brewer(palette = 'Set1', name = '') +
     scale_linetype_discrete(name = '') +
     xlab('') + ylab('Millions of Euros\n') +
-    theme_bw()
+    theme_bw(base_size = 15)
 dev.off()
 
