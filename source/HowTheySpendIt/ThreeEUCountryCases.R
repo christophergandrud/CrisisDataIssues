@@ -1,7 +1,7 @@
 ###############
 # Compare ex post recorded contingent and realised costs
 # Christopher Gandrud
-# 28 May 2014
+# 29 May 2014
 ###############
 
 #### Load packages ####
@@ -58,34 +58,48 @@ DEPlot <- ggplot(DE, aes(year, value, group = variable)) +
             theme_bw()
 
 
-#### Spain ####
-
-ES = subset(MoltenCosts, country == 'ES')
-
-ESPlot <- ggplot(ES, aes(year, value, group = variable)) +
-            geom_line(aes(color = variable)) +
-            geom_vline(xintercept = c(2008, 2011), linetype = 'dashed') +
-            scale_color_manual(values = c('#2c7fb8', '#fdae6b'), guide = FALSE) +
-            xlab('') + ylab('% of 2008 GDP\n') + ggtitle('Spain\n') +
-            theme_bw()
-
-
 #### Combine Plots ####
 # Combine
 gP1 <- ggplotGrob(PTPlot)
 gP2 <- ggplotGrob(IEPlot)
 gP3 <- ggplotGrob(DEPlot)
-gP4 <- ggplotGrob(ESPlot)
 
 maxWidth = grid::unit.pmax(gP1$widths[2:5], gP2$widths[2:5], 
-                           gP3$widths[2:5], gP4$widths[2:5])
+                           gP3$widths[2:5])
 gP1$widths[2:5] <- as.list(maxWidth)
 gP2$widths[2:5] <- as.list(maxWidth)
 gP3$widths[2:5] <- as.list(maxWidth)
-gP4$widths[2:5] <- as.list(maxWidth)
 
 
-pdf('~/Desktop/EuroReWrite/EU_4CasesCompare.pdf', width = 10) ## Change later
-    grid.arrange(arrangeGrob(gP1, gP2, gP3, gP4, ncol = 2, 
-                             heights = c(3, 3, 3, 3)))
+pdf('~/Desktop/EuroReWrite/EU_3CasesCompare.pdf', width = 10) ## Change later
+    grid.arrange(arrangeGrob(gP1, gP2, gP3, ncol = 1, 
+                             heights = c(3, 3, 3)))
 dev.off()
+
+
+#### Ireland Revisions ####
+
+# Create data frame from sources: 
+# http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/documents/IE_2011-10_2nd.pdf
+# http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/documents/IE_2012-04.pdf
+# http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil
+
+type <- c('Original EDPT', 'Revised EDPT', 'Original + Financial\nCrisis', 
+          'Original EDPT', 'Revised EDPT', 'Original + Financial\nCrisis')
+year <- c(2009, 2009, 2009, 
+          2010, 2010, 2010)
+value <- c(5942, 11411, 12059, 
+           5943, 42987, 44146)
+    
+Comb <- data.frame(type, year, value)
+
+pdf('~/Desktop/EuroReWrite/IrelandNumbersCompare.pdf', width = 10) ## Change later
+ggplot(Comb, aes(as.factor(year), value, group = type, linetype = type,
+                 color = type)) +
+    geom_line() +
+    scale_color_brewer(palette = 'Set1', name = '') +
+    scale_linetype_discrete(name = '') +
+    xlab('') + ylab('Millions of Euros\n') +
+    theme_bw()
+dev.off()
+
