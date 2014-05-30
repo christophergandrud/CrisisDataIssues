@@ -1,7 +1,7 @@
 ###############
 # Compare ex post recorded contingent and realised costs
 # Christopher Gandrud
-# 29 May 2014
+# 30 May 2014
 ###############
 
 #### Load packages ####
@@ -26,8 +26,9 @@ MoltenCosts$variable <- factor(MoltenCosts$variable,
 #### Portugal ###
 PT = subset(MoltenCosts, country == 'PT')
 
-PTPlot <- ggplot(PT, aes(year, value, group = variable)) +
-            geom_line(aes(color = variable)) +
+PTPlot <- ggplot(PT, aes(year, value, group = variable, color = variable)) +
+            geom_point(size = 3) +
+            geom_line() +
             geom_vline(xintercept = c(2009, 2011), linetype = 'dashed') +
             scale_color_manual(values = c('#2c7fb8', '#fdae6b'), 
                                guide = FALSE) +
@@ -37,8 +38,9 @@ PTPlot <- ggplot(PT, aes(year, value, group = variable)) +
 #### Ireland ####
 IE = subset(MoltenCosts, country == 'IE')
 
-IEPlot <- ggplot(IE, aes(year, value, group = variable)) +
-            geom_line(aes(color = variable)) +
+IEPlot <- ggplot(IE, aes(year, value, group = variable, color = variable)) +
+            geom_point(size = 3) +
+            geom_line() +
             geom_vline(xintercept = c(2011), linetype = 'dashed') +
             scale_color_manual(values = c('#2c7fb8', '#fdae6b'), 
                                name = 'Liabilities') +
@@ -49,8 +51,9 @@ IEPlot <- ggplot(IE, aes(year, value, group = variable)) +
 
 DE = subset(MoltenCosts, country == 'DE')
 
-DEPlot <- ggplot(DE, aes(year, value, group = variable)) +
-            geom_line(aes(color = variable)) +
+DEPlot <- ggplot(DE, aes(year, value, group = variable, color = variable)) +
+            geom_point(size = 3) +
+            geom_line() +
             geom_vline(xintercept = c(2009, 2013), linetype = 'dashed') +
             scale_color_manual(values = c('#2c7fb8', '#fdae6b'), 
                                guide = FALSE) +
@@ -84,8 +87,8 @@ dev.off()
 # http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/documents/IE_2012-04.pdf
 # http://epp.eurostat.ec.europa.eu/portal/page/portal/government_finance_statistics/excessive_deficit/supplementary_tables_financial_turmoil
 
-type <- c('Original EDPT', 'Revised EDPT', 'Original + Financial\nCrisis', 
-          'Original EDPT', 'Revised EDPT', 'Original + Financial\nCrisis')
+type <- c('Original EDPT', 'Revised EDPT', 'Original + Financial\nCrisis Liabilities', 
+          'Original EDPT', 'Revised EDPT', 'Original + Financial\nCrisis Liabilities')
 year <- c(2009, 2009, 2009, 
           2010, 2010, 2010)
 value <- c(5942, 11411, 12059, 
@@ -98,9 +101,10 @@ Comb <- data.frame(type, year, value)
 pdf('~/Desktop/EuroReWrite/IrelandNumbersCompare.pdf', width = 10) ## Change later
 ggplot(Comb, aes(as.factor(year), value, group = type, linetype = type,
                  color = type)) +
-    geom_line() +
-    scale_color_brewer(palette = 'Set1', name = '') +
-    scale_linetype_discrete(name = '') +
+    geom_point(size = 3) +
+    geom_line(size = 1) +
+    scale_color_brewer(palette = 'Set1', name = 'Data source') +
+    scale_linetype_discrete(name = 'Data source') +
     xlab('') + ylab('Millions of Euros\n') +
     theme_bw(base_size = 15)
 dev.off()
