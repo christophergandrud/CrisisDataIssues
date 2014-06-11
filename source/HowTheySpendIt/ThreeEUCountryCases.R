@@ -109,3 +109,26 @@ ggplot(Comb, aes(as.factor(year), value, group = type, linetype = type,
     theme_bw(base_size = 15)
 dev.off()
 
+
+
+#### Slovenia Test ####
+
+SI = subset(MoltenCosts, country == 'SI')
+
+# Create individual tables numbers (rather than all country sup. table)
+Temp = SI[1:7, ]
+Temp$variable <- 'Indv. Tables\nImmediately\nRealized'
+
+Temp[7, 4] <- 13.82
+
+SINew <- rbind(Temp, SI)
+
+ggplot(SINew, aes(year, value, group = variable, color = variable)) +
+    geom_point(size = 3) +
+    geom_line() +
+    geom_vline(xintercept = c(2008, 2011), linetype = 'dashed') +
+    scale_color_manual(values = c('#2c7fb8', '#fdae6b', '#e41a1c'), 
+                       name = '') +
+    xlab('') + ylab('% of 2008 GDP\n') + ggtitle('Slovenia\n') +
+    theme_bw()
+
