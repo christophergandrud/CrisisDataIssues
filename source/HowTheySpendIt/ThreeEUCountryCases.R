@@ -1,7 +1,7 @@
 ###############
 # Compare ex post recorded contingent and realised costs
 # Christopher Gandrud
-# 30 May 2014
+# 13 June 2014
 ###############
 
 #### Load packages ####
@@ -35,18 +35,6 @@ PTPlot <- ggplot(PT, aes(year, value, group = variable, color = variable)) +
             xlab('') + ylab('% of 2008 GDP\n') + ggtitle('Portugal\n') +
             theme_bw()
 
-#### Ireland ####
-IE = subset(MoltenCosts, country == 'IE')
-
-IEPlot <- ggplot(IE, aes(year, value, group = variable, color = variable)) +
-            geom_point(size = 3) +
-            geom_line() +
-            geom_vline(xintercept = c(2011), linetype = 'dashed') +
-            scale_color_manual(values = c('#2c7fb8', '#fdae6b'), 
-                               name = 'Liabilities') +
-            xlab('') + ylab('% of 2008 GDP\n') + ggtitle('Ireland\n') +
-            theme_bw()
-
 #### Germany ####
 
 DE = subset(MoltenCosts, country == 'DE')
@@ -60,12 +48,24 @@ DEPlot <- ggplot(DE, aes(year, value, group = variable, color = variable)) +
             xlab('') + ylab('% of 2008 GDP\n') + ggtitle('Germany\n') +
             theme_bw()
 
+#### Ireland ####
+IE = subset(MoltenCosts, country == 'IE')
+
+IEPlot <- ggplot(IE, aes(year, value, group = variable, color = variable)) +
+    geom_point(size = 3) +
+    geom_line() +
+    geom_vline(xintercept = c(2011), linetype = 'dashed') +
+    scale_color_manual(values = c('#2c7fb8', '#fdae6b'), 
+                       name = 'Liabilities') +
+    xlab('') + ylab('% of 2008 GDP\n') + ggtitle('Ireland\n') +
+    theme_bw()
+
 
 #### Combine Plots ####
 # Combine
 gP1 <- ggplotGrob(PTPlot)
-gP2 <- ggplotGrob(IEPlot)
-gP3 <- ggplotGrob(DEPlot)
+gP2 <- ggplotGrob(DEPlot)
+gP3 <- ggplotGrob(IEPlot)
 
 maxWidth = grid::unit.pmax(gP1$widths[2:5], gP2$widths[2:5], 
                            gP3$widths[2:5])
@@ -112,7 +112,6 @@ dev.off()
 
 
 #### Slovenia Test ####
-
 SI = subset(MoltenCosts, country == 'SI')
 
 # Create individual tables numbers (rather than all country sup. table)
