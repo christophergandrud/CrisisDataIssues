@@ -1,8 +1,8 @@
 ///////////////
 // Update Keefer (2007)
 // Christopher Gandrud
-// 16 April 2014
-// Using Stata 12
+// 26 June 2014
+// Using Stata 12.1
 ///////////////
 
 cd "~/Dropbox/AMCProject/CrisisDataIssuesPaper/tables"
@@ -47,6 +47,10 @@ keep if year < 2001
 
 regress LV2012_Fiscal ChecksResiduals33 DiEiec33 stabnsLag3, vce(cluster country)
 	regsave using "LVPre2001.dta", detail(all) replace table(LVPre2001, order(regvars r2) format(%5.2f) paren(stderr) asterisk())
+	
+// Include 3 year post-crisis start as indicator of crisis severity
+regress LogLV ChecksResiduals33 DiEiec33 stabnsLag3 GrowthLead3, vce(cluster country)
+
 
 // Using updated LV data for crises before 2001 only when Keefer also has data
 keep if Keefer2007_Fiscal != .
@@ -56,3 +60,6 @@ regress LV2012_Fiscal ChecksResiduals33 DiEiec33 stabnsLag3, vce(cluster country
 	
 regress LogLV ChecksResiduals33 DiEiec33 stabnsLag3, vce(cluster country)
 	regsave using "LVPre2001KeeferSampleLog.dta", detail(all) replace table(LVPre2001Keef, order(regvars r2) format(%5.2f) paren(stderr) asterisk())
+	
+
+

@@ -74,7 +74,7 @@ gP2$widths[2:5] <- as.list(maxWidth)
 gP3$widths[2:5] <- as.list(maxWidth)
 
 
-pdf('~/Desktop/EuroReWrite/EU_3CasesCompare.pdf', width = 10) ## Change later
+pdf('~/Desktop/EU_3CasesCompare.pdf', width = 10) ## Change later
     grid.arrange(arrangeGrob(gP1, gP2, gP3, ncol = 1, 
                              heights = c(3, 3, 3)))
 dev.off()
